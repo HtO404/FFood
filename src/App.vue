@@ -21,7 +21,7 @@
     <!-- 分类筛选 -->
     <div class="category-scroll">
       <button
-        v-for="cat in categories"
+        v-for="cat in filterCategories"
         :key="cat.key"
         :class="['category-chip', { active: activeCategory === cat.key }]"
         @click="filterCategory(cat.key)"
@@ -107,7 +107,7 @@
             <label class="form-label">分类</label>
             <div class="category-picker">
               <button
-                v-for="cat in categories"
+                v-for="cat in foodCategories"
                 :key="cat.key"
                 :class="['category-option', { active: form.category === cat.key }]"
                 @click="form.category = cat.key"
@@ -164,14 +164,23 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useFoodStore } from './store/foodStore.js'
 
 const foodStore = useFoodStore()
 
-// 分类
-const categories = [
+// 分类（筛选用，含"全部"）
+const filterCategories = [
   { key: 'all',      label: '全部',  emoji: '📋' },
+  { key: '蔬菜',     label: '蔬菜',  emoji: '🥬' },
+  { key: '水果',     label: '水果',  emoji: '🍎' },
+  { key: '肉类',     label: '肉类',  emoji: '🥩' },
+  { key: '乳制品',   label: '乳制品', emoji: '🥛' },
+  { key: '调料',     label: '调料',  emoji: '🧂' },
+  { key: '其他',     label: '其他',  emoji: '📦' },
+]
+// 分类（表单用，不含"全部"）
+const foodCategories = [
   { key: '蔬菜',     label: '蔬菜',  emoji: '🥬' },
   { key: '水果',     label: '水果',  emoji: '🍎' },
   { key: '肉类',     label: '肉类',  emoji: '🥩' },
@@ -206,7 +215,7 @@ function getDefaultForm() {
 
 // 计算属性
 const filteredFoods = computed(() => {
-  let list = foodStore.foods.value
+  let list = foodStore.foods
   if (activeCategory.value !== 'all') {
     list = list.filter(f => f.category === activeCategory.value)
   }
@@ -292,7 +301,7 @@ function expiryLabel(days) {
 }
 
 function getCategoryEmoji(cat) {
-  const found = categories.find(c => c.key === cat)
+  const found = filterCategories.find(c => c.key === cat)
   return found ? found.emoji : '📦'
 }
 
