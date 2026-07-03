@@ -1,4 +1,4 @@
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 
 /**
  * 统一滑动删除 + 长按多选 + 复选框批量删除的可复用逻辑
@@ -22,7 +22,28 @@ export function useSwipeBatch(options = {}) {
 
   // ========== 滑动删除 ==========
   const swipedId = ref(null)
-  const SWIPE_THRESHOLD = -64
+  // 视口宽度：用于按屏宽动态调整滑动阈值，与 CSS .swipe-actions 宽度匹配
+  const viewportWidth = ref(typeof window !== 'undefined' ? window.innerWidth : 390)
+  // 滑动触发阈值（负值）：跟随屏宽，避免小屏需滑过远才能触发删除
+  //   ≤360px → -52  (CSS swipe-actions 56px / shop 52px)
+  //   ≤380px → -60  (CSS swipe-actions 64px)
+  //   默认    → -64  (CSS swipe-actions 80px / shop 72px)
+  const SWIPE_THRESHOLD = computed(() => {
+    const w = viewportWidth.value
+    if (w <= 360) return -52
+    if (w <= 380) return -60
+    return -64
+  })
+  // 拖动最大距离（带约 10px 过冲），与 swipe-actions 宽度匹配，避免小屏拖出大片空白红底
+  const SWIPE_LIMIT = computed(() => {
+    const w = viewportWidth.value
+    if (w <= 360) return -66
+    if (w <= 380) return -74
+    return -90
+  })
+  function _onResize() { viewportWidth.value = window.innerWidth }
+  onMounted(() => window.addEventListener('resize', _onResize))
+  onUnmounted(() => window.removeEventListener('resize', _onResize))
   const touchMap = new Map()
   const mouseMap = new Map()
 
@@ -39,7 +60,7 @@ export function useSwipeBatch(options = {}) {
   })
 
   function cardStyle(id) {
-    const x = swipedId.value === id ? SWIPE_THRESHOLD : 0
+    const x = swipedId.value === id ? SWIPE_THRESHOLD.value : 0
     return {
       transform: `translateX(${x}px)`,
       transition: 'transform 0.25s cubic-bezier(0.25, 0.1, 0.25, 1)',
@@ -84,7 +105,8 @@ export function useSwipeBatch(options = {}) {
     e.preventDefault()
     const card = e.currentTarget.querySelector(cardSelector)
     if (!card) return
-    if (dx < 0) card.style.transform = `translateX(${Math.max(dx, -90)}px)`
+    const limit = SWIPE_LIMIT.value
+    if (dx < 0) card.style.transform = `translateX(${Math.max(dx, limit)}px)`
     else card.style.transform = `translateX(${Math.min(dx, 0)}px)`
   }
 
@@ -96,7 +118,7 @@ export function useSwipeBatch(options = {}) {
     const dx = t.clientX - state.startX
     const card = e.currentTarget.querySelector(cardSelector)
     if (card) card.style.transform = ''
-    if (dx < SWIPE_THRESHOLD) swipedId.value = item.id
+    if (dx < SWIPE_THRESHOLD.value) swipedId.value = item.id
     else swipedId.value = null
     touchMap.delete(item.id)
   }

@@ -2056,6 +2056,15 @@ select.form-input {
 
 /* ===== 响应式适配 ===== */
 
+/* ---- 中小屏 (361-380px)：iPhone 8/SE3 等 375 宽屏，复选框/swipe 中间档 ---- */
+/* 注意：本块需置于 (max-width: 360px) 之前，让 ≤360 屏的后定义规则覆盖此处 */
+@media (max-width: 380px) {
+  .select-checkbox { width: 22px; height: 22px; border-radius: 11px; font-size: 13px; }
+  .checkbox-icon { width: 22px; height: 22px; border-radius: 11px; font-size: 13px; }
+  .swipe-actions { width: 64px; }
+  .swipe-action-btn { width: 64px; }
+}
+
 /* ---- 超小屏 (≤360px)：压缩间距和字号 ---- */
 @media (max-width: 360px) {
   :root {
@@ -2072,7 +2081,37 @@ select.form-input {
   .nav-title { font-size: var(--font-title1); }
   .tab-icon { font-size: 20px; }
   .tab-label { font-size: 9px; }
-  .fab { width: 52px; height: 52px; bottom: calc(var(--fab-bottom) - 4px); }
+  .fab { width: 52px; height: 52px; bottom: calc(var(--fab-bottom) - 4px); right: 12px; }
+
+  /* 复选框 / 圆圈：缩到 20×20，避免在 320-360 屏挤压内容 */
+  .select-checkbox { width: 20px; height: 20px; border-radius: 10px; font-size: 12px; }
+  .checkbox-icon { width: 20px; height: 20px; border-radius: 10px; font-size: 12px; }
+  .shop-check { width: 20px; height: 20px; border-radius: 10px; font-size: 11px; }
+
+  /* 左滑删除区：默认 80 → 56，shop 72 → 52，避免小屏占比过大 (320px 屏原占 25%) */
+  .swipe-actions { width: 56px; }
+  .swipe-action-btn { width: 56px; }
+  .swipe-action-btn .action-emoji { font-size: 20px; }
+  .swipe-action-btn .action-label { font-size: 10px; }
+  .shop-item-wrapper .swipe-actions { width: 52px; }
+  .shop-item-wrapper .swipe-action-btn { width: 52px; }
+
+  /* 卡片内边距收紧 2px，提升小屏信息密度 */
+  .food-card { padding: 12px 14px; }
+  .recipe-item-card { padding: 12px 14px; }
+  .shop-item-card { gap: 8px; padding: 10px 12px; }
+
+  /* 批量工具栏：压缩 padding/字号，确保 320px 屏 4 按钮不换行 */
+  .batch-toolbar-inner { gap: 6px; padding: 8px 10px; }
+  .batch-toolbar-inner .batch-btn { padding: 6px 10px; font-size: 13px; }
+  .batch-toolbar-inner .batch-info { font-size: 13px; }
+
+  /* modal 收紧 padding，确保 320×568 标题+输入+按钮完整可见 */
+  .modal-sheet { padding-top: var(--spacing-sm); }
+  .modal-title { font-size: var(--font-callout); margin-bottom: var(--spacing-sm); padding: 0 var(--spacing-md); }
+  .modal-body { padding: 0 var(--spacing-md); }
+  .modal-actions { padding: var(--spacing-sm) var(--spacing-md) max(16px, env(safe-area-inset-bottom)); gap: var(--spacing-xs); }
+  .form-input { height: 40px; }
 }
 
 /* ---- 小屏 (361px–480px)：默认基准 ---- */
@@ -2098,6 +2137,10 @@ select.form-input {
   .tab-label { font-size: 11px; }
   .nav-title { font-size: 32px; }
   .fab { width: 60px; height: 60px; }
+  /* 复选框放大到 28×28，大屏易点（默认 24×24 在 iPad 上偏小） */
+  .select-checkbox { width: 28px; height: 28px; border-radius: 14px; font-size: 16px; }
+  .checkbox-icon { width: 28px; height: 28px; border-radius: 14px; font-size: 16px; }
+  .shop-check { width: 26px; height: 26px; border-radius: 13px; font-size: 14px; }
 }
 
 /* ---- 横屏 (短边≤500px 且宽高比>1)：压缩 TabBar 和 FAB ---- */
