@@ -52,6 +52,13 @@
   /* 模糊 */
   --blur-bg: blur(20px) saturate(180%);
   --blur-card: blur(12px) saturate(140%);
+
+  /* 层级系统 */
+  --z-base: 0;
+  --z-nav: 100;
+  --z-tabbar: 200;
+  --z-fab: 210;
+  --z-modal: 300;
 }
 
 /* ===== 全局重置 ===== */
@@ -109,7 +116,7 @@ select:focus {
   padding: var(--spacing-lg) 0 var(--spacing-sm);
   position: sticky;
   top: 0;
-  z-index: 100;
+  z-index: var(--z-nav);
   background: var(--bg-primary);
   backdrop-filter: var(--blur-bg);
   -webkit-backdrop-filter: var(--blur-bg);
@@ -267,23 +274,59 @@ select:focus {
   border-radius: 10px;
 }
 
-/* ===== 食材卡片 ===== */
+/* ===== 食材卡片（左滑删除） ===== */
+.food-card-wrapper {
+  position: relative;
+  margin-bottom: 8px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  user-select: none;
+  touch-action: pan-y;
+}
+
+.food-card-actions {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  justify-content: flex-end;
+  align-items: stretch;
+  background: var(--red);
+  z-index: 1;
+}
+
+.food-action-btn {
+  width: 88px;
+  border: none;
+  background: transparent;
+  color: var(--text-inverse);
+  font-size: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.food-action-btn:active {
+  background: rgba(0, 0, 0, 0.12);
+}
+
 .food-card {
   display: flex;
   align-items: center;
   gap: var(--spacing-md);
   padding: 14px 16px;
-  margin-bottom: 8px;
   border-radius: var(--radius-md);
   background: var(--bg-card);
   backdrop-filter: var(--blur-card);
   -webkit-backdrop-filter: var(--blur-card);
   box-shadow: var(--shadow-sm);
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.25, 0.1, 0.25, 1);
   user-select: none;
   position: relative;
   overflow: hidden;
+  z-index: 2;
+  will-change: transform;
 }
 
 .food-card::before {
@@ -310,7 +353,6 @@ select:focus {
 }
 
 .food-card:active {
-  transform: scale(0.985);
   box-shadow: var(--shadow-md);
 }
 
@@ -334,9 +376,13 @@ select:focus {
   margin-top: 2px;
 }
 
-.food-expiry {
+.food-actions {
   text-align: right;
   flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
 }
 
 .expiry-badge {
@@ -371,35 +417,6 @@ select:focus {
 .expiry-date {
   font-size: var(--font-caption);
   color: var(--text-tertiary);
-  margin-top: 3px;
-}
-
-.food-delete {
-  position: absolute;
-  right: 14px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  border: none;
-  background: rgba(255, 59, 48, 0.08);
-  font-size: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  opacity: 0;
-  transition: opacity 0.2s, background 0.15s;
-}
-
-.food-card:hover .food-delete,
-.food-card:active .food-delete {
-  opacity: 1;
-}
-
-.food-delete:active {
-  background: rgba(255, 59, 48, 0.2);
 }
 
 /* 卡片过渡动画 */
@@ -449,7 +466,7 @@ select:focus {
 /* ===== FAB ===== */
 .fab {
   position: fixed;
-  bottom: 30px;
+  bottom: max(90px, calc(env(safe-area-inset-bottom) + 84px));
   right: max(16px, calc((100% - 480px) / 2 + 16px));
   width: 58px;
   height: 58px;
@@ -465,7 +482,7 @@ select:focus {
   cursor: pointer;
   box-shadow: 0 4px 16px rgba(0, 122, 255, 0.4);
   transition: all 0.2s cubic-bezier(0.25, 0.1, 0.25, 1);
-  z-index: 200;
+  z-index: var(--z-fab);
   user-select: none;
 }
 
@@ -484,7 +501,7 @@ select:focus {
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  z-index: 300;
+  z-index: var(--z-modal);
 }
 
 .modal-sheet {
@@ -1168,7 +1185,7 @@ select.form-input {
   -webkit-backdrop-filter: var(--blur-bg);
   border-top: 0.5px solid rgba(142, 142, 147, 0.15);
   padding: 4px 0 max(4px, env(safe-area-inset-bottom));
-  z-index: 250;
+  z-index: var(--z-tabbar);
 }
 
 .tab-item {

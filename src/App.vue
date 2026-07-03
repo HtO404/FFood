@@ -57,21 +57,25 @@
           <span class="group-count">{{ group.items.length }}</span>
         </div>
         <TransitionGroup name="food-card" tag="div" class="group-items">
-          <div v-for="food in group.items" :key="food.id"
-            :class="['food-card', { expired: food.daysLeft < 0, warning: food.daysLeft >= 0 && food.daysLeft <= 1, selected: batchMode && selectedIds.has(food.id) }]"
-            @click="handleCardClick(food)">
-            <div v-if="batchMode" class="food-checkbox">
-              <div :class="['checkbox-icon', { checked: selectedIds.has(food.id) }]"><span v-if="selectedIds.has(food.id)">✓</span></div>
+          <div class="food-card-wrapper" v-for="food in group.items" :key="food.id"
+            @touchstart="touchStart($event, food.id)" @touchmove="touchMove($event, food.id)" @touchend="touchEnd($event, food.id)">
+            <div class="food-card-actions">
+              <button class="food-action-btn food-action-delete" @click.stop="confirmDelete(food)" title="删除">🗑️</button>
             </div>
-            <div class="food-info">
-              <div class="food-name">{{ food.name }}</div>
-              <div class="food-meta"><span class="food-qty">{{ food.quantity }} {{ food.unit }}</span><span v-if="food.storage" class="food-storage">· {{ food.storage }}</span></div>
+            <div :class="['food-card', { expired: food.daysLeft < 0, warning: food.daysLeft >= 0 && food.daysLeft <= 1, selected: batchMode && selectedIds.has(food.id), 'swipe-open': swipedId === food.id }]"
+              @click="handleCardClick(food)" :style="cardStyle(food.id)">
+              <div v-if="batchMode" class="food-checkbox" @click.stop>
+                <div :class="['checkbox-icon', { checked: selectedIds.has(food.id) }]"><span v-if="selectedIds.has(food.id)">✓</span></div>
+              </div>
+              <div class="food-info">
+                <div class="food-name">{{ food.name }}</div>
+                <div class="food-meta"><span class="food-qty">{{ food.quantity }} {{ food.unit }}</span><span v-if="food.storage" class="food-storage">· {{ food.storage }}</span></div>
+              </div>
+              <div class="food-actions" @click.stop>
+                <div :class="['expiry-badge', expiryClass(food.daysLeft)]">{{ expiryLabel(food.daysLeft) }}</div>
+                <div class="expiry-date">{{ formatDate(food.expiryDate) }}</div>
+              </div>
             </div>
-            <div class="food-expiry">
-              <div :class="['expiry-badge', expiryClass(food.daysLeft)]">{{ expiryLabel(food.daysLeft) }}</div>
-              <div class="expiry-date">{{ formatDate(food.expiryDate) }}</div>
-            </div>
-            <button v-if="!batchMode" class="food-delete" @click.stop="confirmDelete(food)" title="删除">🗑️</button>
           </div>
         </TransitionGroup>
       </div>
@@ -367,9 +371,48 @@ function toggleBatchMode() { batchMode.value = !batchMode.value; if (!batchMode.
 function toggleSelectAll() { selectedIds.value = allSelected.value ? new Set() : new Set(filteredFoods.value.map(f => f.id)) }
 const allSelected = computed(() => filteredFoods.value.length > 0 && selectedIds.value.size === filteredFoods.value.length)
 function handleCardClick(food) {
+  if (swipedId.value && swipedId.value !== food.id) { swipedId.value = null; return }
   if (batchMode.value) { const s = new Set(selectedIds.value); if (s.has(food.id)) s.delete(food.id); else s.add(food.id); selectedIds.value = s }
   else editFood(food)
 }
+
+// ========== 列表滑动删除 ==========
+const swipedId = ref(null)
+const touchMap = new Map()
+const SWIPE_THRESHOLD = -64
+
+function cardStyle(id) {
+  const x = swipedId.value === id ? SWIPE_THRESHOLD : 0
+  return { transform: `translateX(${x}px)`, transition: 'transform 0.25s cubic-bezier(0.25, 0.1, 0.25, 1)' }
+}
+function touchStart(e, id) {
+  if (batchMode.value) return
+  const t = e.touches[0]
+  touchMap.set(id, { startX: t.clientX, startY: t.clientY, time: Date.now() })
+}
+function touchMove(e, id) {
+  if (batchMode.value || !touchMap.has(id)) return
+  const t = e.touches[0]
+  const state = touchMap.get(id)
+  const dx = t.clientX - state.startX
+  const dy = t.clientY - state.startY
+  if (Math.abs(dy) > Math.abs(dx)) return
+  e.preventDefault()
+  const card = e.currentTarget.querySelector('.food-card')
+  if (dx < 0) card.style.transform = `translateX(${Math.max(dx, -90)}px)`
+  else card.style.transform = `translateX(${Math.min(dx, 0)}px)`
+}
+function touchEnd(e, id) {
+  if (batchMode.value || !touchMap.has(id)) return
+  const t = e.changedTouches[0]
+  const state = touchMap.get(id)
+  const dx = t.clientX - state.startX
+  const card = e.currentTarget.querySelector('.food-card')
+  card.style.transform = ''
+  if (dx < SWIPE_THRESHOLD) { swipedId.value = id } else { swipedId.value = null }
+  touchMap.delete(id)
+}
+
 function batchDelete() { if (selectedIds.value.size > 0) batchDeleteTarget.value = `删除 ${selectedIds.value.size} 件食材` }
 function doBatchDelete() { foodStore.removeFoods([...selectedIds.value]); selectedIds.value = new Set(); batchDeleteTarget.value = ''; batchMode.value = false }
 function batchMarkConsumed() { if (selectedIds.value.size) { foodStore.markConsumed([...selectedIds.value]); selectedIds.value = new Set() } }
