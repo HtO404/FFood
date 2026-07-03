@@ -1363,4 +1363,276 @@ select.form-input {
 
 .shop-clear-btn:active { background: rgba(255, 59, 48, 0.08); }
 
+/* ===== 菜谱推荐 (P2-2) ===== */
+.recipe-list {
+  padding-bottom: 80px;
+}
+
+.recipe-hint {
+  font-size: var(--font-subhead);
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-md);
+  padding: 10px 14px;
+  background: rgba(245, 166, 35, 0.08);
+  border-radius: var(--radius-sm);
+  line-height: 1.5;
+}
+
+.recipe-hint strong { color: var(--orange); }
+
+.recipe-card {
+  background: var(--bg-card);
+  backdrop-filter: var(--blur-card);
+  -webkit-backdrop-filter: var(--blur-card);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  margin-bottom: 10px;
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.recipe-card:active { transform: scale(0.985); }
+
+.recipe-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.recipe-emoji { font-size: 32px; flex-shrink: 0; }
+
+.recipe-info { flex: 1; min-width: 0; }
+
+.recipe-name {
+  font-size: var(--font-callout);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.recipe-meta {
+  font-size: var(--font-caption);
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+.recipe-match-badge {
+  font-size: var(--font-caption);
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+
+.match-full {
+  background: rgba(52, 199, 89, 0.12);
+  color: var(--green);
+}
+
+.match-high {
+  background: rgba(255, 149, 0, 0.12);
+  color: var(--orange);
+}
+
+.match-low {
+  background: rgba(142, 142, 147, 0.1);
+  color: var(--text-secondary);
+}
+
+.recipe-body {
+  margin-top: var(--spacing-md);
+  padding-top: var(--spacing-md);
+  border-top: 0.5px solid rgba(142, 142, 147, 0.15);
+}
+
+.recipe-section { margin-bottom: var(--spacing-sm); }
+
+.recipe-section-title {
+  font-size: var(--font-caption);
+  font-weight: 600;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+
+.recipe-ingredients {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.ingredient-tag {
+  font-size: var(--font-footnote);
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-weight: 500;
+}
+
+.ingredient-have {
+  background: rgba(52, 199, 89, 0.08);
+  color: var(--green);
+}
+
+.ingredient-miss {
+  background: rgba(255, 59, 48, 0.06);
+  color: var(--red);
+}
+
+.recipe-step {
+  display: flex;
+  gap: 10px;
+  padding: 6px 0;
+  font-size: var(--font-subhead);
+  color: var(--text-primary);
+  line-height: 1.5;
+}
+
+.step-num {
+  width: 22px;
+  height: 22px;
+  border-radius: 11px;
+  background: var(--orange);
+  color: var(--text-inverse);
+  font-size: var(--font-caption);
+  font-weight: 700;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.step-text { flex: 1; }
+
+.recipe-actions { margin-top: var(--spacing-sm); }
+
+.btn-recipe-shop {
+  width: 100%;
+  padding: 10px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: rgba(0, 122, 255, 0.08);
+  color: var(--blue);
+  font-size: var(--font-subhead);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.btn-recipe-shop:active { background: rgba(0, 122, 255, 0.18); }
+
+.expand-enter-active,
+.expand-leave-active {
+  transition: all 0.25s ease;
+  overflow: hidden;
+}
+
+.expand-enter-from,
+.expand-leave-to {
+  opacity: 0;
+  max-height: 0;
+}
+
+.expand-enter-to,
+.expand-leave-from {
+  opacity: 1;
+  max-height: 500px;
+}
+
+/* ===== 扫码录入 (P2-3) ===== */
+.barcode-input-row {
+  display: flex;
+  gap: 8px;
+}
+
+.barcode-input {
+  flex: 1;
+  font-family: 'SF Mono', 'Menlo', 'Consolas', monospace;
+  letter-spacing: 1px;
+}
+
+.barcode-scan-btn {
+  height: 44px;
+  padding: 0 20px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--blue);
+  color: var(--text-inverse);
+  font-size: var(--font-callout);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+  white-space: nowrap;
+}
+
+.barcode-scan-btn:active { background: #0066d6; }
+.barcode-scan-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+.barcode-error {
+  margin-top: 8px;
+  text-align: center;
+}
+
+.scanned-product {
+  text-align: center;
+  padding: var(--spacing-lg);
+  background: rgba(52, 199, 89, 0.06);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--spacing-md);
+}
+
+.scanned-icon { font-size: 48px; margin-bottom: 8px; }
+
+.scanned-name {
+  font-size: var(--font-title3);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.scanned-meta {
+  font-size: var(--font-footnote);
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-sm);
+}
+
+.barcode-add-btn {
+  margin-top: var(--spacing-sm);
+}
+
+.barcode-test-hint {
+  margin-top: var(--spacing-lg);
+  padding-top: var(--spacing-md);
+  border-top: 0.5px solid rgba(142, 142, 147, 0.12);
+}
+
+.test-barcodes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.test-barcode-chip {
+  padding: 4px 10px;
+  background: rgba(142, 142, 147, 0.08);
+  border-radius: 8px;
+  font-size: var(--font-caption);
+  font-family: 'SF Mono', 'Menlo', monospace;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.test-barcode-chip:active { background: var(--blue); color: var(--text-inverse); }
+
+/* ===== 响应式 ===== */
+@media (max-width: 480px) {
+  .app { padding: 0 var(--spacing-sm) 120px; }
+}
+
+@media (min-width: 481px) {
+  .modal-sheet { border-radius: var(--radius-xl); margin-bottom: var(--spacing-lg); }
+}
+
 /* ===== 响应式 ===== */

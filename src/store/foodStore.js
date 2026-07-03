@@ -5,12 +5,41 @@ const TEMPLATES_KEY = 'ffood_templates'
 const SHOPLIST_KEY = 'ffood_shoplist'
 const MAX_TEMPLATES = 20
 
+// ═════════ P2-2 菜谱 ═════════
+const RECIPES = [
+  { id:'r1', name:'番茄炒蛋', category:'蔬菜', emoji:'🍳', difficulty:'简单', time:15, ingredients:['鸡蛋','番茄','葱'], steps:['鸡蛋打散加盐炒熟盛出','番茄切块炒出汁','倒入鸡蛋翻炒，加盐调味'] },
+  { id:'r2', name:'青椒肉丝', category:'肉类', emoji:'🫑', difficulty:'简单', time:20, ingredients:['猪肉','青椒','蒜'], steps:['肉切丝加生抽淀粉腌制','青椒切丝','热油爆蒜炒肉丝至变色','加入青椒翻炒调味出锅'] },
+  { id:'r3', name:'凉拌黄瓜', category:'蔬菜', emoji:'🥒', difficulty:'超简单', time:5, ingredients:['黄瓜','蒜','醋'], steps:['黄瓜拍碎切段','加蒜末、醋、生抽、辣椒油','拌匀即可'] },
+  { id:'r4', name:'红烧排骨', category:'肉类', emoji:'🍖', difficulty:'中等', time:60, ingredients:['排骨','姜','酱油'], steps:['排骨焯水去血沫','炒糖色下排骨翻炒','加酱油姜片八角水炖40分钟','大火收汁'] },
+  { id:'r5', name:'蒜蓉西兰花', category:'蔬菜', emoji:'🥦', difficulty:'超简单', time:10, ingredients:['西兰花','蒜'], steps:['西兰花焯水1分钟捞出','热油爆香蒜末','倒入西兰花翻炒加盐调味'] },
+  { id:'r6', name:'土豆炖牛肉', category:'肉类', emoji:'🥔', difficulty:'中等', time:90, ingredients:['牛肉','土豆','胡萝卜'], steps:['牛肉切块焯水','热油炒香葱姜下牛肉翻炒','加水酱油炖1小时','加入土豆胡萝卜再炖20分钟'] },
+  { id:'r7', name:'鸡蛋羹', category:'乳制品', emoji:'🥚', difficulty:'简单', time:15, ingredients:['鸡蛋','牛奶'], steps:['鸡蛋打散加温水搅匀','过筛去泡沫','盖保鲜膜蒸10分钟','淋生抽香油'] },
+  { id:'r8', name:'水果沙拉', category:'水果', emoji:'🥗', difficulty:'超简单', time:5, ingredients:['苹果','香蕉','酸奶'], steps:['水果切块','倒入酸奶拌匀'] },
+  { id:'r9', name:'醋溜白菜', category:'蔬菜', emoji:'🥬', difficulty:'简单', time:10, ingredients:['白菜','醋','干辣椒'], steps:['白菜切片','热油爆香干辣椒','大火翻炒白菜至断生','淋醋加盐出锅'] },
+  { id:'r10', name:'可乐鸡翅', category:'肉类', emoji:'🍗', difficulty:'简单', time:30, ingredients:['鸡翅','可乐','姜'], steps:['鸡翅划两刀焯水','煎至两面金黄','加姜片可乐没过鸡翅','中火收汁'] },
+  { id:'r11', name:'蒜苗回锅肉', category:'肉类', emoji:'🥓', difficulty:'简单', time:25, ingredients:['五花肉','蒜苗','豆瓣酱'], steps:['五花肉煮8分熟切片','热油煸炒肉片出油','加豆瓣酱炒出红油','加蒜苗翻炒出锅'] },
+  { id:'r12', name:'清炒时蔬', category:'蔬菜', emoji:'🥬', difficulty:'超简单', time:8, ingredients:['蔬菜','蒜'], steps:['任意蔬菜洗净切段','热油爆蒜','大火快炒加盐即可'] },
+]
+
+// ═════════ P2-3 条形码模拟数据 ═════════
+const BARCODE_DB = {
+  '6901234567890':{name:'伊利纯牛奶 250ml',category:'乳制品',defaultDays:30,defaultStorage:'常温'},
+  '6909876543210':{name:'双汇火腿肠 400g',category:'肉类',defaultDays:90,defaultStorage:'冷藏'},
+  '6901111222333':{name:'西红柿 约200g',category:'蔬菜',defaultDays:7,defaultStorage:'冷藏'},
+  '6902222333444':{name:'鸡胸肉 500g',category:'肉类',defaultDays:3,defaultStorage:'冷冻'},
+  '6903333444555':{name:'蒙牛酸奶 100g×8',category:'乳制品',defaultDays:21,defaultStorage:'冷藏'},
+  '6904444555666':{name:'鸡蛋 10枚装',category:'乳制品',defaultDays:30,defaultStorage:'冷藏'},
+  '6905555666777':{name:'苹果 约300g',category:'水果',defaultDays:14,defaultStorage:'冷藏'},
+  '6906666777888':{name:'西兰花 约300g',category:'蔬菜',defaultDays:5,defaultStorage:'冷藏'},
+}
+
 class FoodStore {
   constructor() {
     this.state = reactive({
       foods: [],
       templates: [],
       shopList: [],
+      recipes: RECIPES,
     })
   }
 
@@ -239,6 +268,32 @@ class FoodStore {
       console.error('[FFood] 购物清单加载失败:', e)
       this.state.shopList = []
     }
+  }
+
+  // ==================== 菜谱匹配 (P2-2) ====================
+
+  get recipes() { return this.state.recipes }
+
+  getRecommendedRecipes() {
+    const foodNames = new Set(this.state.foods.map(f => f.name))
+    const results = []
+    for (const r of this.state.recipes) {
+      const matched = r.ingredients.filter(ing =>
+        [...foodNames].some(fn => fn.includes(ing) || ing.includes(fn))
+      )
+      const unmatched = r.ingredients.filter(ing =>
+        ![...foodNames].some(fn => fn.includes(ing) || ing.includes(fn))
+      )
+      const ratio = r.ingredients.length > 0 ? matched.length / r.ingredients.length : 0
+      results.push({ ...r, matchedCount: matched.length, matched, unmatched, ratio })
+    }
+    return results.sort((a, b) => b.ratio - a.ratio || b.matchedCount - a.matchedCount)
+  }
+
+  // ==================== 条形码 (P2-3) ====================
+
+  scanBarcode(code) {
+    return BARCODE_DB[code] || null
   }
 }
 
