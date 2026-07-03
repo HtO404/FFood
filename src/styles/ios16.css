@@ -750,6 +750,152 @@ select.form-input {
   gap: var(--spacing-sm);
 }
 
+/* ===== 表单错误 ===== */
+.form-input-error {
+  box-shadow: inset 0 0 0 2px var(--red) !important;
+  background: rgba(255, 59, 48, 0.04) !important;
+}
+
+.form-error {
+  font-size: var(--font-caption);
+  color: var(--red);
+  margin-top: 4px;
+  padding-left: 4px;
+  animation: shakeX 0.3s ease;
+}
+
+@keyframes shakeX {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
+}
+
+/* ===== 模板快捷区 ===== */
+.templates-section {
+  margin-bottom: var(--spacing-md);
+}
+
+.templates-scroll {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+}
+
+.template-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  background: rgba(0, 122, 255, 0.08);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-subhead);
+  color: var(--blue);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.template-chip:active {
+  background: rgba(0, 122, 255, 0.18);
+}
+
+.template-chip-del {
+  font-size: 11px;
+  opacity: 0.5;
+  padding: 2px;
+}
+
+.template-chip-del:active {
+  opacity: 1;
+}
+
+/* ===== 数量 + 单位选择器 ===== */
+.qty-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.qty-input {
+  flex: 1;
+}
+
+.unit-picker {
+  display: flex;
+  gap: 4px;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-sm);
+  padding: 2px;
+}
+
+.unit-chip {
+  padding: 6px 12px;
+  font-size: var(--font-subhead);
+  font-weight: 500;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.unit-chip.active {
+  background: #ffffff;
+  color: var(--blue);
+  box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+/* ===== 日期双栏 ===== */
+.date-dual-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.date-col {
+  flex: 1;
+}
+
+.date-input {
+  width: 100%;
+}
+
+.date-arrow {
+  font-size: 18px;
+  color: var(--text-tertiary);
+  padding-top: 4px;
+}
+
+.days-col {
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+
+.days-suffix {
+  font-size: var(--font-subhead);
+  color: var(--text-secondary);
+  padding: 0 12px 0 8px;
+  white-space: nowrap;
+}
+
+.expiry-preview {
+  margin-top: 8px;
+  padding: 8px 12px;
+  background: rgba(52, 199, 89, 0.08);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-subhead);
+  color: var(--green);
+}
+
+.expiry-preview strong {
+  font-weight: 700;
+  color: #2d9d4a;
+}
+
+/* ===== 空状态更新 ===== */
+
 /* ===== 响应式 ===== */
 @media (max-width: 480px) {
   .app {

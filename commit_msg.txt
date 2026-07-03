@@ -1,0 +1,11 @@
+fix: 修复冒烟测试中发现的 bug
+
+修复内容:
+1. foodStore.foods.value → foodStore.foods (getter 返回直接值, .value 多余导致不响应)
+2. import 移除未使用的 watch
+3. 分类列表现拆分: 筛选用含"全部"的 filterCategories, 表单用不含的 foodCategories
+
+构建验证:
+- Vite build 零错误通过
+- JS: 82.53 KB, gzip 32.57 KB
+- CSS: 11.58 KB, gzip 3.10 KB
