@@ -354,10 +354,10 @@
       </div>
     </div>
 
-    <!-- FAB：全 Tab 统一显示（profile 无添加语义，不显示） -->
-    <button v-if="activeTab === 'food'" class="fab" @click="openAddModal">+</button>
-    <button v-else-if="activeTab === 'recipes'" class="fab fab-recipe" @click="openRecipeModal">+</button>
-    <button v-else-if="activeTab === 'shop'" class="fab fab-shop" @click="focusShopInput">+</button>
+    <!-- FAB：全 Tab 统一显示（profile 无添加语义，不显示；多选模式下隐藏避免误触） -->
+    <button v-if="activeTab === 'food' && !foodBatch.batchMode.value" class="fab" @click="openAddModal">+</button>
+    <button v-else-if="activeTab === 'recipes' && !recipeBatch.batchMode.value" class="fab fab-recipe" @click="openRecipeModal">+</button>
+    <button v-else-if="activeTab === 'shop' && !shopBatch.batchMode.value" class="fab fab-shop" @click="focusShopInput">+</button>
 
     <!-- TabBar -->
     <nav class="tab-bar">

@@ -537,10 +537,17 @@ function clampFloat(val, min, max) {
 
 /**
  * 根据购买日期 + 保质期天数计算到期日
+ * 防御非法日期字符串导致 new Date(x).toISOString() 抛 RangeError
  */
 function calcExpiryDate(purchaseDate, days) {
   const d = new Date(purchaseDate)
-  d.setDate(d.getDate() + Math.ceil(days))
+  if (isNaN(d.getTime())) {
+    // 非法日期兜底为今天
+    const today = new Date()
+    today.setDate(today.getDate() + Math.ceil(days || 0))
+    return today.toISOString().slice(0, 10)
+  }
+  d.setDate(d.getDate() + Math.ceil(days || 0))
   return d.toISOString().slice(0, 10)
 }
 

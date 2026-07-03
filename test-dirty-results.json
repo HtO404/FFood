@@ -1,0 +1,2126 @@
+[
+  {
+    "group": "食材.validateFoodName",
+    "field": "name",
+    "sampleName": "空字符串",
+    "input": "",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "valid=false msg=\"名称不能为空\""
+  },
+  {
+    "group": "食材.validateFoodName",
+    "field": "name",
+    "sampleName": "全空格",
+    "input": "     ",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "valid=false msg=\"名称不能为空\""
+  },
+  {
+    "group": "食材.validateFoodName",
+    "field": "name",
+    "sampleName": "超长100",
+    "input": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa…(+40)",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "valid=false msg=\"名称不能超过20个字符\""
+  },
+  {
+    "group": "食材.validateFoodName",
+    "field": "name",
+    "sampleName": "超长10000",
+    "input": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa…(+9940)",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "valid=false msg=\"名称不能超过20个字符\""
+  },
+  {
+    "group": "食材.validateFoodName",
+    "field": "name",
+    "sampleName": "纯emoji",
+    "input": "🍎🔄🏳️‍🌈",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "valid=false msg=\"名称只能包含汉字、字母和数字\""
+  },
+  {
+    "group": "食材.validateFoodName",
+    "field": "name",
+    "sampleName": "中英日韩混合",
+    "input": "西红柿 tomato トマト 토마토",
+    "status": "FAIL",
+    "severity": "P2",
+    "detail": "正常数据被拒 valid=false msg=\"名称只能包含汉字、字母和数字\""
+  },
+  {
+    "group": "食材.validateFoodName",
+    "field": "name",
+    "sampleName": "特殊字符",
+    "input": "!@#$%^&*()_+-=[]{}|;':\",./<>?`\\",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "valid=false msg=\"名称不能超过20个字符\""
+  },
+  {
+    "group": "食材.validateFoodName",
+    "field": "name",
+    "sampleName": "控制字符",
+    "input": "\n\t\r\u0000",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "valid=false msg=\"名称只能包含汉字、字母和数字\""
+  },
+  {
+    "group": "食材.validateFoodName",
+    "field": "name",
+    "sampleName": "零宽字符",
+    "input": "西​红柿",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "valid=false msg=\"名称只能包含汉字、字母和数字\""
+  },
+  {
+    "group": "食材.validateFoodName",
+    "field": "name",
+    "sampleName": "组合字符é",
+    "input": "café résumé",
+    "status": "FAIL",
+    "severity": "P2",
+    "detail": "正常数据被拒 valid=false msg=\"名称只能包含汉字、字母和数字\""
+  },
+  {
+    "group": "食材.validateFoodName",
+    "field": "name",
+    "sampleName": "RTL字符",
+    "input": "مرحبا בעברית",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "valid=false msg=\"名称只能包含汉字、字母和数字\""
+  },
+  {
+    "group": "食材.validateFoodName",
+    "field": "name",
+    "sampleName": "HTML实体",
+    "input": "&lt;&amp;&#x27;&quot;",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "valid=false msg=\"名称不能超过20个字符\""
+  },
+  {
+    "group": "食材.validateFoodName",
+    "field": "name",
+    "sampleName": "JSON注入",
+    "input": "{\"$gt\":\"\"}",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "valid=false msg=\"名称只能包含汉字、字母和数字\""
+  },
+  {
+    "group": "食材.validateFoodName",
+    "field": "name",
+    "sampleName": "SQL注入",
+    "input": "\"; DROP TABLE users; --",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "valid=false msg=\"名称不能超过20个字符\""
+  },
+  {
+    "group": "食材.validateFoodName",
+    "field": "name",
+    "sampleName": "XSS脚本",
+    "input": "<script>alert(1)</script>",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "valid=false msg=\"名称不能超过20个字符\""
+  },
+  {
+    "group": "食材.validateFoodName",
+    "field": "name",
+    "sampleName": "正常西红柿",
+    "input": "西红柿",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "valid=true msg=\"\""
+  },
+  {
+    "group": "食材.validateQuantity",
+    "field": "quantity",
+    "sampleName": "空字符串",
+    "input": "",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "valid=false msg=\"不能小于 0.1\""
+  },
+  {
+    "group": "食材.validateQuantity",
+    "field": "quantity",
+    "sampleName": "全空格",
+    "input": "     ",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "valid=false msg=\"不能小于 0.1\""
+  },
+  {
+    "group": "食材.validateQuantity",
+    "field": "quantity",
+    "sampleName": "数字abc",
+    "input": "abc",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "valid=false msg=\"不能小于 0.1\""
+  },
+  {
+    "group": "食材.validateQuantity",
+    "field": "quantity",
+    "sampleName": "数字undefined",
+    "input": "undefined",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "valid=false msg=\"不能小于 0.1\""
+  },
+  {
+    "group": "食材.validateQuantity",
+    "field": "quantity",
+    "sampleName": "数字null",
+    "input": "null",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "valid=false msg=\"不能小于 0.1\""
+  },
+  {
+    "group": "食材.validateQuantity",
+    "field": "quantity",
+    "sampleName": "负数-1",
+    "input": "-1",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "valid=false msg=\"不能小于 0.1\""
+  },
+  {
+    "group": "食材.validateQuantity",
+    "field": "quantity",
+    "sampleName": "数字0",
+    "input": "0",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "valid=false msg=\"不能小于 0.1\""
+  },
+  {
+    "group": "食材.validateQuantity",
+    "field": "quantity",
+    "sampleName": "极大值1e308",
+    "input": "1e308",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "valid=false msg=\"不能超过 99.9\""
+  },
+  {
+    "group": "食材.validateQuantity",
+    "field": "quantity",
+    "sampleName": "Infinity",
+    "input": "Infinity",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "valid=false msg=\"不能超过 99.9\""
+  },
+  {
+    "group": "食材.validateQuantity",
+    "field": "quantity",
+    "sampleName": "NaN",
+    "input": "NaN",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "valid=false msg=\"不能小于 0.1\""
+  },
+  {
+    "group": "食材.validateQuantity",
+    "field": "quantity",
+    "sampleName": "正常数字5",
+    "input": "5",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "valid=true msg=\"\""
+  },
+  {
+    "group": "食材.validateDays",
+    "field": "days",
+    "sampleName": "空字符串",
+    "input": "",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "valid=false msg=\"天数不能小于 0.1 天\""
+  },
+  {
+    "group": "食材.validateDays",
+    "field": "days",
+    "sampleName": "全空格",
+    "input": "     ",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "valid=false msg=\"天数不能小于 0.1 天\""
+  },
+  {
+    "group": "食材.validateDays",
+    "field": "days",
+    "sampleName": "数字abc",
+    "input": "abc",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "valid=false msg=\"天数不能小于 0.1 天\""
+  },
+  {
+    "group": "食材.validateDays",
+    "field": "days",
+    "sampleName": "负数-1",
+    "input": "-1",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "valid=false msg=\"天数不能小于 0.1 天\""
+  },
+  {
+    "group": "食材.validateDays",
+    "field": "days",
+    "sampleName": "数字0",
+    "input": "0",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "valid=false msg=\"天数不能小于 0.1 天\""
+  },
+  {
+    "group": "食材.validateDays",
+    "field": "days",
+    "sampleName": "极大值1e308",
+    "input": "1e308",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "valid=false msg=\"天数不能超过 99.9 天\""
+  },
+  {
+    "group": "食材.validateDays",
+    "field": "days",
+    "sampleName": "Infinity",
+    "input": "Infinity",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "valid=false msg=\"天数不能超过 99.9 天\""
+  },
+  {
+    "group": "食材.validateDays",
+    "field": "days",
+    "sampleName": "NaN",
+    "input": "NaN",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "valid=false msg=\"天数不能小于 0.1 天\""
+  },
+  {
+    "group": "食材.validateDays",
+    "field": "days",
+    "sampleName": "正常数字5",
+    "input": "5",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "valid=true msg=\"\""
+  },
+  {
+    "group": "食材.addFood",
+    "field": "name",
+    "sampleName": "空字符串",
+    "input": "",
+    "status": "FAIL",
+    "severity": "P1",
+    "detail": "name 被存为空字符串 → \"\""
+  },
+  {
+    "group": "食材.addFood",
+    "field": "name",
+    "sampleName": "全空格",
+    "input": "     ",
+    "status": "FAIL",
+    "severity": "P1",
+    "detail": "name 被存为空字符串 → \"\""
+  },
+  {
+    "group": "食材.addFood",
+    "field": "name",
+    "sampleName": "超长10000",
+    "input": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa…(+9940)",
+    "status": "FAIL",
+    "severity": "P1",
+    "detail": "name 超长未截断 len=10000 → \"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa…(+9905)"
+  },
+  {
+    "group": "食材.addFood",
+    "field": "name",
+    "sampleName": "纯emoji",
+    "input": "🍎🔄🏳️‍🌈",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "存储 name=\"🍎🔄🏳️‍🌈\" (len=10)"
+  },
+  {
+    "group": "食材.addFood",
+    "field": "name",
+    "sampleName": "中英日韩混合",
+    "input": "西红柿 tomato トマト 토마토",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "存储 name=\"西红柿 tomato トマト 토마토\" (len=18)"
+  },
+  {
+    "group": "食材.addFood",
+    "field": "name",
+    "sampleName": "特殊字符",
+    "input": "!@#$%^&*()_+-=[]{}|;':\",./<>?`\\",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "存储 name=\"!@#$%^&*()_+-=[]{}|;':\\\",./<>?`\\\\\" (len=31)"
+  },
+  {
+    "group": "食材.addFood",
+    "field": "name",
+    "sampleName": "控制字符",
+    "input": "\n\t\r\u0000",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "存储 name=\"\\u0000\" (len=1)"
+  },
+  {
+    "group": "食材.addFood",
+    "field": "name",
+    "sampleName": "零宽字符",
+    "input": "西​红柿",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "存储 name=\"西​红柿\" (len=4)"
+  },
+  {
+    "group": "食材.addFood",
+    "field": "name",
+    "sampleName": "JSON注入",
+    "input": "{\"$gt\":\"\"}",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "存储 name=\"{\\\"$gt\\\":\\\"\\\"}\" (len=10)"
+  },
+  {
+    "group": "食材.addFood",
+    "field": "name",
+    "sampleName": "SQL注入",
+    "input": "\"; DROP TABLE users; --",
+    "status": "FAIL",
+    "severity": "P2",
+    "detail": "SQL 注入字符串原样存储 → \"\\\"; DROP TABLE users; --\""
+  },
+  {
+    "group": "食材.addFood",
+    "field": "name",
+    "sampleName": "XSS脚本",
+    "input": "<script>alert(1)</script>",
+    "status": "FAIL",
+    "severity": "P2",
+    "detail": "XSS 字符串原样存储 → \"<script>alert(1)</script>\""
+  },
+  {
+    "group": "食材.addFood",
+    "field": "name",
+    "sampleName": "正常西红柿",
+    "input": "西红柿",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "存储 name=\"西红柿\" (len=3)"
+  },
+  {
+    "group": "食材.addFood",
+    "field": "quantity",
+    "sampleName": "空字符串",
+    "input": "",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "夹正后 quantity=0.1"
+  },
+  {
+    "group": "食材.addFood",
+    "field": "quantity",
+    "sampleName": "数字abc",
+    "input": "abc",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "夹正后 quantity=0.1"
+  },
+  {
+    "group": "食材.addFood",
+    "field": "quantity",
+    "sampleName": "数字undefined",
+    "input": "undefined",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "夹正后 quantity=0.1"
+  },
+  {
+    "group": "食材.addFood",
+    "field": "quantity",
+    "sampleName": "负数-1",
+    "input": "-1",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "夹正后 quantity=0.1"
+  },
+  {
+    "group": "食材.addFood",
+    "field": "quantity",
+    "sampleName": "数字0",
+    "input": "0",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "夹正后 quantity=0.1"
+  },
+  {
+    "group": "食材.addFood",
+    "field": "quantity",
+    "sampleName": "极大值1e308",
+    "input": "1e308",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "夹正后 quantity=99.9"
+  },
+  {
+    "group": "食材.addFood",
+    "field": "quantity",
+    "sampleName": "Infinity",
+    "input": "Infinity",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "夹正后 quantity=99.9"
+  },
+  {
+    "group": "食材.addFood",
+    "field": "quantity",
+    "sampleName": "NaN",
+    "input": "NaN",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "夹正后 quantity=0.1"
+  },
+  {
+    "group": "食材.addFood",
+    "field": "quantity",
+    "sampleName": "正常数字5",
+    "input": "5",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "夹正后 quantity=5"
+  },
+  {
+    "group": "食材.addFood",
+    "field": "days",
+    "sampleName": "空字符串",
+    "input": "",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "夹正后 days=0.1"
+  },
+  {
+    "group": "食材.addFood",
+    "field": "days",
+    "sampleName": "数字abc",
+    "input": "abc",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "夹正后 days=0.1"
+  },
+  {
+    "group": "食材.addFood",
+    "field": "days",
+    "sampleName": "负数-1",
+    "input": "-1",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "夹正后 days=0.1"
+  },
+  {
+    "group": "食材.addFood",
+    "field": "days",
+    "sampleName": "数字0",
+    "input": "0",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "夹正后 days=0.1"
+  },
+  {
+    "group": "食材.addFood",
+    "field": "days",
+    "sampleName": "极大值1e308",
+    "input": "1e308",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "夹正后 days=99.9"
+  },
+  {
+    "group": "食材.addFood",
+    "field": "days",
+    "sampleName": "Infinity",
+    "input": "Infinity",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "夹正后 days=99.9"
+  },
+  {
+    "group": "食材.addFood",
+    "field": "days",
+    "sampleName": "NaN",
+    "input": "NaN",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "夹正后 days=0.1"
+  },
+  {
+    "group": "食材.addFood",
+    "field": "days",
+    "sampleName": "正常数字5",
+    "input": "5",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "夹正后 days=5"
+  },
+  {
+    "group": "食材.addFood",
+    "field": "purchaseDate",
+    "sampleName": "空字符串",
+    "input": "",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "空日期回退到 today pd=2026-07-03"
+  },
+  {
+    "group": "食材.addFood",
+    "field": "purchaseDate",
+    "sampleName": "非法日期",
+    "input": "2026-13-45",
+    "status": "CRASH",
+    "severity": "P0",
+    "detail": "抛异常: RangeError: Invalid time value"
+  },
+  {
+    "group": "食材.addFood",
+    "field": "purchaseDate",
+    "sampleName": "数字abc",
+    "input": "abc",
+    "status": "CRASH",
+    "severity": "P0",
+    "detail": "抛异常: RangeError: Invalid time value"
+  },
+  {
+    "group": "食材.addFood",
+    "field": "purchaseDate",
+    "sampleName": "SQL注入",
+    "input": "\"; DROP TABLE users; --",
+    "status": "CRASH",
+    "severity": "P0",
+    "detail": "抛异常: RangeError: Invalid time value"
+  },
+  {
+    "group": "食材.addFood",
+    "field": "purchaseDate",
+    "sampleName": "XSS脚本",
+    "input": "<script>alert(1)</script>",
+    "status": "CRASH",
+    "severity": "P0",
+    "detail": "抛异常: RangeError: Invalid time value"
+  },
+  {
+    "group": "食材.addFood",
+    "field": "purchaseDate",
+    "sampleName": "正常日期",
+    "input": "2026-07-03",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "正常 pd=2026-07-03 expiry=2026-07-10"
+  },
+  {
+    "group": "食材.addFood",
+    "field": "category",
+    "sampleName": "空字符串",
+    "input": "",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "空 category 回退到 其他"
+  },
+  {
+    "group": "食材.addFood",
+    "field": "category",
+    "sampleName": "纯emoji",
+    "input": "🍎🔄🏳️‍🌈",
+    "status": "FAIL",
+    "severity": "P2",
+    "detail": "无白名单校验，原样存储 category=\"🍎🔄🏳️‍🌈\""
+  },
+  {
+    "group": "食材.addFood",
+    "field": "category",
+    "sampleName": "特殊字符",
+    "input": "!@#$%^&*()_+-=[]{}|;':\",./<>?`\\",
+    "status": "FAIL",
+    "severity": "P2",
+    "detail": "无白名单校验，原样存储 category=\"!@#$%^&*()_+-=[]{}|;':\\\",./<>?`\\\\\""
+  },
+  {
+    "group": "食材.addFood",
+    "field": "category",
+    "sampleName": "JSON注入",
+    "input": "{\"$gt\":\"\"}",
+    "status": "FAIL",
+    "severity": "P2",
+    "detail": "无白名单校验，原样存储 category=\"{\\\"$gt\\\":\\\"\\\"}\""
+  },
+  {
+    "group": "食材.addFood",
+    "field": "category",
+    "sampleName": "SQL注入",
+    "input": "\"; DROP TABLE users; --",
+    "status": "FAIL",
+    "severity": "P2",
+    "detail": "无白名单校验，原样存储 category=\"\\\"; DROP TABLE users; --\""
+  },
+  {
+    "group": "食材.addFood",
+    "field": "category",
+    "sampleName": "XSS脚本",
+    "input": "<script>alert(1)</script>",
+    "status": "FAIL",
+    "severity": "P2",
+    "detail": "无白名单校验，原样存储 category=\"<script>alert(1)</script>\""
+  },
+  {
+    "group": "食材.addFood",
+    "field": "storage",
+    "sampleName": "空字符串",
+    "input": "",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "空 storage 回退到 冷藏"
+  },
+  {
+    "group": "食材.addFood",
+    "field": "storage",
+    "sampleName": "纯emoji",
+    "input": "🍎🔄🏳️‍🌈",
+    "status": "FAIL",
+    "severity": "P2",
+    "detail": "无白名单校验，原样存储 storage=\"🍎🔄🏳️‍🌈\""
+  },
+  {
+    "group": "食材.addFood",
+    "field": "storage",
+    "sampleName": "特殊字符",
+    "input": "!@#$%^&*()_+-=[]{}|;':\",./<>?`\\",
+    "status": "FAIL",
+    "severity": "P2",
+    "detail": "无白名单校验，原样存储 storage=\"!@#$%^&*()_+-=[]{}|;':\\\",./<>?`\\\\\""
+  },
+  {
+    "group": "食材.addFood",
+    "field": "storage",
+    "sampleName": "JSON注入",
+    "input": "{\"$gt\":\"\"}",
+    "status": "FAIL",
+    "severity": "P2",
+    "detail": "无白名单校验，原样存储 storage=\"{\\\"$gt\\\":\\\"\\\"}\""
+  },
+  {
+    "group": "食材.addFood",
+    "field": "storage",
+    "sampleName": "SQL注入",
+    "input": "\"; DROP TABLE users; --",
+    "status": "FAIL",
+    "severity": "P2",
+    "detail": "无白名单校验，原样存储 storage=\"\\\"; DROP TABLE users; --\""
+  },
+  {
+    "group": "食材.addFood",
+    "field": "storage",
+    "sampleName": "XSS脚本",
+    "input": "<script>alert(1)</script>",
+    "status": "FAIL",
+    "severity": "P2",
+    "detail": "无白名单校验，原样存储 storage=\"<script>alert(1)</script>\""
+  },
+  {
+    "group": "菜谱.addRecipe",
+    "field": "name",
+    "sampleName": "空字符串",
+    "input": "",
+    "status": "FAIL",
+    "severity": "P1",
+    "detail": "store 层未拦截空 name，存为空字符串"
+  },
+  {
+    "group": "菜谱.addRecipe",
+    "field": "name",
+    "sampleName": "全空格",
+    "input": "     ",
+    "status": "FAIL",
+    "severity": "P1",
+    "detail": "store 层未拦截空 name，存为空字符串"
+  },
+  {
+    "group": "菜谱.addRecipe",
+    "field": "name",
+    "sampleName": "超长10000",
+    "input": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa…(+9940)",
+    "status": "FAIL",
+    "severity": "P1",
+    "detail": "name 超长未截断 len=10000"
+  },
+  {
+    "group": "菜谱.addRecipe",
+    "field": "name",
+    "sampleName": "纯emoji",
+    "input": "🍎🔄🏳️‍🌈",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "存储 name=\"🍎🔄🏳️‍🌈\""
+  },
+  {
+    "group": "菜谱.addRecipe",
+    "field": "name",
+    "sampleName": "特殊字符",
+    "input": "!@#$%^&*()_+-=[]{}|;':\",./<>?`\\",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "存储 name=\"!@#$%^&*()_+-=[]{}|;':\\\",./<>?`\\\\\""
+  },
+  {
+    "group": "菜谱.addRecipe",
+    "field": "name",
+    "sampleName": "控制字符",
+    "input": "\n\t\r\u0000",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "存储 name=\"\\u0000\""
+  },
+  {
+    "group": "菜谱.addRecipe",
+    "field": "name",
+    "sampleName": "JSON注入",
+    "input": "{\"$gt\":\"\"}",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "存储 name=\"{\\\"$gt\\\":\\\"\\\"}\""
+  },
+  {
+    "group": "菜谱.addRecipe",
+    "field": "name",
+    "sampleName": "SQL注入",
+    "input": "\"; DROP TABLE users; --",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "存储 name=\"\\\"; DROP TABLE users; --\""
+  },
+  {
+    "group": "菜谱.addRecipe",
+    "field": "name",
+    "sampleName": "XSS脚本",
+    "input": "<script>alert(1)</script>",
+    "status": "FAIL",
+    "severity": "P2",
+    "detail": "XSS 字符串原样存储 → \"<script>alert(1)</script>\""
+  },
+  {
+    "group": "菜谱.addRecipe",
+    "field": "name",
+    "sampleName": "正常西红柿",
+    "input": "西红柿",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "存储 name=\"西红柿\""
+  },
+  {
+    "group": "菜谱.addRecipe",
+    "field": "emoji",
+    "sampleName": "空字符串",
+    "input": "",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "空 emoji 回退到 🍳"
+  },
+  {
+    "group": "菜谱.addRecipe",
+    "field": "emoji",
+    "sampleName": "纯emoji",
+    "input": "🍎🔄🏳️‍🌈",
+    "status": "FAIL",
+    "severity": "P2",
+    "detail": "emoji 字段超长 len=10 → \"🍎🔄🏳️‍🌈\""
+  },
+  {
+    "group": "菜谱.addRecipe",
+    "field": "emoji",
+    "sampleName": "特殊字符",
+    "input": "!@#$%^&*()_+-=[]{}|;':\",./<>?`\\",
+    "status": "FAIL",
+    "severity": "P2",
+    "detail": "emoji 字段超长 len=31 → \"!@#$%^&*()_+-=[]{}|;':\\\",./<>?`\\\\\""
+  },
+  {
+    "group": "菜谱.addRecipe",
+    "field": "emoji",
+    "sampleName": "XSS脚本",
+    "input": "<script>alert(1)</script>",
+    "status": "FAIL",
+    "severity": "P2",
+    "detail": "emoji 字段超长 len=25 → \"<script>alert(1)</script>\""
+  },
+  {
+    "group": "菜谱.addRecipe",
+    "field": "emoji",
+    "sampleName": "中英日韩混合",
+    "input": "西红柿 tomato トマト 토마토",
+    "status": "FAIL",
+    "severity": "P2",
+    "detail": "emoji 字段超长 len=18 → \"西红柿 tomato トマト 토마토\""
+  },
+  {
+    "group": "菜谱.addRecipe",
+    "field": "time",
+    "sampleName": "空字符串",
+    "input": "",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "存储 time=15"
+  },
+  {
+    "group": "菜谱.addRecipe",
+    "field": "time",
+    "sampleName": "数字abc",
+    "input": "abc",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "存储 time=15"
+  },
+  {
+    "group": "菜谱.addRecipe",
+    "field": "time",
+    "sampleName": "负数-1",
+    "input": "-1",
+    "status": "FAIL",
+    "severity": "P1",
+    "detail": "负数 time 被存 time=-1"
+  },
+  {
+    "group": "菜谱.addRecipe",
+    "field": "time",
+    "sampleName": "数字0",
+    "input": "0",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "存储 time=15"
+  },
+  {
+    "group": "菜谱.addRecipe",
+    "field": "time",
+    "sampleName": "极大值1e308",
+    "input": "1e308",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "存储 time=1"
+  },
+  {
+    "group": "菜谱.addRecipe",
+    "field": "time",
+    "sampleName": "Infinity",
+    "input": "Infinity",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "存储 time=15"
+  },
+  {
+    "group": "菜谱.addRecipe",
+    "field": "time",
+    "sampleName": "NaN",
+    "input": "NaN",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "存储 time=15"
+  },
+  {
+    "group": "菜谱.addRecipe",
+    "field": "time",
+    "sampleName": "正常数字5",
+    "input": "5",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "存储 time=5"
+  },
+  {
+    "group": "菜谱.addRecipe",
+    "field": "time",
+    "sampleName": "SQL注入",
+    "input": "\"; DROP TABLE users; --",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "存储 time=15"
+  },
+  {
+    "group": "菜谱.addRecipe",
+    "field": "difficulty",
+    "sampleName": "空字符串",
+    "input": "",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "空 difficulty 回退到 简单"
+  },
+  {
+    "group": "菜谱.addRecipe",
+    "field": "difficulty",
+    "sampleName": "纯emoji",
+    "input": "🍎🔄🏳️‍🌈",
+    "status": "FAIL",
+    "severity": "P2",
+    "detail": "无白名单，原样存储 difficulty=\"🍎🔄🏳️‍🌈\""
+  },
+  {
+    "group": "菜谱.addRecipe",
+    "field": "difficulty",
+    "sampleName": "特殊字符",
+    "input": "!@#$%^&*()_+-=[]{}|;':\",./<>?`\\",
+    "status": "FAIL",
+    "severity": "P2",
+    "detail": "无白名单，原样存储 difficulty=\"!@#$%^&*()_+-=[]{}|;':\\\",./<>?`\\\\\""
+  },
+  {
+    "group": "菜谱.addRecipe",
+    "field": "difficulty",
+    "sampleName": "JSON注入",
+    "input": "{\"$gt\":\"\"}",
+    "status": "FAIL",
+    "severity": "P2",
+    "detail": "无白名单，原样存储 difficulty=\"{\\\"$gt\\\":\\\"\\\"}\""
+  },
+  {
+    "group": "菜谱.addRecipe",
+    "field": "difficulty",
+    "sampleName": "XSS脚本",
+    "input": "<script>alert(1)</script>",
+    "status": "FAIL",
+    "severity": "P2",
+    "detail": "无白名单，原样存储 difficulty=\"<script>alert(1)</script>\""
+  },
+  {
+    "group": "菜谱.addRecipe",
+    "field": "category",
+    "sampleName": "空字符串",
+    "input": "",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "空 category 回退到 其他"
+  },
+  {
+    "group": "菜谱.addRecipe",
+    "field": "category",
+    "sampleName": "纯emoji",
+    "input": "🍎🔄🏳️‍🌈",
+    "status": "FAIL",
+    "severity": "P2",
+    "detail": "无白名单，原样存储 category=\"🍎🔄🏳️‍🌈\""
+  },
+  {
+    "group": "菜谱.addRecipe",
+    "field": "category",
+    "sampleName": "JSON注入",
+    "input": "{\"$gt\":\"\"}",
+    "status": "FAIL",
+    "severity": "P2",
+    "detail": "无白名单，原样存储 category=\"{\\\"$gt\\\":\\\"\\\"}\""
+  },
+  {
+    "group": "菜谱.addRecipe",
+    "field": "category",
+    "sampleName": "XSS脚本",
+    "input": "<script>alert(1)</script>",
+    "status": "FAIL",
+    "severity": "P2",
+    "detail": "无白名单，原样存储 category=\"<script>alert(1)</script>\""
+  },
+  {
+    "group": "菜谱.addRecipe",
+    "field": "ingredientsText",
+    "sampleName": "含空段",
+    "input": "[\"鸡蛋\",\"\",\"  \",\"番茄\"]",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "存储 ingredients=[\"鸡蛋\",\"番茄\"]"
+  },
+  {
+    "group": "菜谱.addRecipe",
+    "field": "ingredientsText",
+    "sampleName": "超长食材",
+    "input": "[\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa…(+4944)",
+    "status": "FAIL",
+    "severity": "P1",
+    "detail": "食材项超长未限制 len=5000"
+  },
+  {
+    "group": "菜谱.addRecipe",
+    "field": "ingredientsText",
+    "sampleName": "XSS食材",
+    "input": "[\"<img src=x onerror=alert(1)>\"]",
+    "status": "FAIL",
+    "severity": "P2",
+    "detail": "脏数据食材项原样保留 → [\"<img src=x onerror=alert(1)>\"]"
+  },
+  {
+    "group": "菜谱.addRecipe",
+    "field": "ingredientsText",
+    "sampleName": "SQL食材",
+    "input": "[\"\\\"; DROP TABLE;\"]",
+    "status": "FAIL",
+    "severity": "P2",
+    "detail": "脏数据食材项原样保留 → [\"\\\"; DROP TABLE;\"]"
+  },
+  {
+    "group": "菜谱.addRecipe",
+    "field": "ingredientsText",
+    "sampleName": "纯emoji食材",
+    "input": "[\"🍎🍎\"]",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "存储 ingredients=[\"🍎🍎\"]"
+  },
+  {
+    "group": "菜谱.addRecipe",
+    "field": "ingredientsText",
+    "sampleName": "控制字符食材",
+    "input": "[\"鸡\\n蛋\\t\"]",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "存储 ingredients=[\"鸡\\n蛋\"]"
+  },
+  {
+    "group": "菜谱.addRecipe",
+    "field": "stepsText",
+    "sampleName": "含空步",
+    "input": "[\"步骤1\",\"\",\"  \",\"步骤2\"]",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "存储 steps=[\"步骤1\",\"步骤2\"]"
+  },
+  {
+    "group": "菜谱.addRecipe",
+    "field": "stepsText",
+    "sampleName": "超长步骤",
+    "input": "[\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa…(+4944)",
+    "status": "FAIL",
+    "severity": "P1",
+    "detail": "步骤超长未限制 len=5000"
+  },
+  {
+    "group": "菜谱.addRecipe",
+    "field": "stepsText",
+    "sampleName": "XSS步骤",
+    "input": "[\"<script>alert(1)</script>\"]",
+    "status": "FAIL",
+    "severity": "P2",
+    "detail": "XSS 步骤原样保留 → [\"<script>alert(1)</script>\"]"
+  },
+  {
+    "group": "菜谱.addRecipe",
+    "field": "stepsText",
+    "sampleName": "控制字符步",
+    "input": "[\"步骤\\n\\t一\\r\"]",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "存储 steps=[\"步骤\\n\\t一\"]"
+  },
+  {
+    "group": "购物.addShopItem",
+    "field": "shopInput",
+    "sampleName": "空字符串",
+    "input": "",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "空/全空格被拒绝"
+  },
+  {
+    "group": "购物.addShopItem",
+    "field": "shopInput",
+    "sampleName": "全空格",
+    "input": "     ",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "空/全空格被拒绝"
+  },
+  {
+    "group": "购物.addShopItem",
+    "field": "shopInput",
+    "sampleName": "超长100",
+    "input": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa…(+40)",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "存储 text=\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\" (len=100)"
+  },
+  {
+    "group": "购物.addShopItem",
+    "field": "shopInput",
+    "sampleName": "超长10000",
+    "input": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa…(+9940)",
+    "status": "FAIL",
+    "severity": "P1",
+    "detail": "shop 项超长未限制 len=10000 (HTML maxlength=30 仅前端)"
+  },
+  {
+    "group": "购物.addShopItem",
+    "field": "shopInput",
+    "sampleName": "纯emoji",
+    "input": "🍎🔄🏳️‍🌈",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "存储 text=\"🍎🔄🏳️‍🌈\" (len=10)"
+  },
+  {
+    "group": "购物.addShopItem",
+    "field": "shopInput",
+    "sampleName": "中英日韩混合",
+    "input": "西红柿 tomato トマト 토마토",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "存储 text=\"西红柿 tomato トマト 토마토\" (len=18)"
+  },
+  {
+    "group": "购物.addShopItem",
+    "field": "shopInput",
+    "sampleName": "特殊字符",
+    "input": "!@#$%^&*()_+-=[]{}|;':\",./<>?`\\",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "存储 text=\"!@#$%^&*()_+-=[]{}|;':\\\",./<>?`\\\\\" (len=31)"
+  },
+  {
+    "group": "购物.addShopItem",
+    "field": "shopInput",
+    "sampleName": "控制字符",
+    "input": "\n\t\r\u0000",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "存储 text=\"\\u0000\" (len=1)"
+  },
+  {
+    "group": "购物.addShopItem",
+    "field": "shopInput",
+    "sampleName": "JSON注入",
+    "input": "{\"$gt\":\"\"}",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "存储 text=\"{\\\"$gt\\\":\\\"\\\"}\" (len=10)"
+  },
+  {
+    "group": "购物.addShopItem",
+    "field": "shopInput",
+    "sampleName": "SQL注入",
+    "input": "\"; DROP TABLE users; --",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "存储 text=\"\\\"; DROP TABLE users; --\" (len=23)"
+  },
+  {
+    "group": "购物.addShopItem",
+    "field": "shopInput",
+    "sampleName": "XSS脚本",
+    "input": "<script>alert(1)</script>",
+    "status": "FAIL",
+    "severity": "P2",
+    "detail": "XSS 原样存储 → \"<script>alert(1)</script>\""
+  },
+  {
+    "group": "购物.addShopItem",
+    "field": "shopInput",
+    "sampleName": "零宽字符",
+    "input": "西​红柿",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "存储 text=\"西​红柿\" (len=4)"
+  },
+  {
+    "group": "购物.addShopItem",
+    "field": "shopInput",
+    "sampleName": "正常西红柿",
+    "input": "西红柿",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "存储 text=\"西红柿\" (len=3)"
+  },
+  {
+    "group": "用户.saveUser",
+    "field": "nickname",
+    "sampleName": "空字符串",
+    "input": "",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "存储 nickname=\"\" (len=0)"
+  },
+  {
+    "group": "用户.saveUser",
+    "field": "nickname",
+    "sampleName": "全空格",
+    "input": "     ",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "存储 nickname=\"     \" (len=5)"
+  },
+  {
+    "group": "用户.saveUser",
+    "field": "nickname",
+    "sampleName": "超长100",
+    "input": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa…(+40)",
+    "status": "FAIL",
+    "severity": "P1",
+    "detail": "nickname 超长未限制 len=100 (HTML maxlength=12 仅前端)"
+  },
+  {
+    "group": "用户.saveUser",
+    "field": "nickname",
+    "sampleName": "超长10000",
+    "input": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa…(+9940)",
+    "status": "FAIL",
+    "severity": "P1",
+    "detail": "nickname 超长未限制 len=10000 (HTML maxlength=12 仅前端)"
+  },
+  {
+    "group": "用户.saveUser",
+    "field": "nickname",
+    "sampleName": "纯emoji",
+    "input": "🍎🔄🏳️‍🌈",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "存储 nickname=\"🍎🔄🏳️‍🌈\" (len=10)"
+  },
+  {
+    "group": "用户.saveUser",
+    "field": "nickname",
+    "sampleName": "特殊字符",
+    "input": "!@#$%^&*()_+-=[]{}|;':\",./<>?`\\",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "存储 nickname=\"!@#$%^&*()_+-=[]{}|;':\\\",./<>?`\\\\\" (len=31)"
+  },
+  {
+    "group": "用户.saveUser",
+    "field": "nickname",
+    "sampleName": "控制字符",
+    "input": "\n\t\r\u0000",
+    "status": "FAIL",
+    "severity": "P2",
+    "detail": "控制字符保留 → \"\\n\\t\\r\\u0000\""
+  },
+  {
+    "group": "用户.saveUser",
+    "field": "nickname",
+    "sampleName": "JSON注入",
+    "input": "{\"$gt\":\"\"}",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "存储 nickname=\"{\\\"$gt\\\":\\\"\\\"}\" (len=10)"
+  },
+  {
+    "group": "用户.saveUser",
+    "field": "nickname",
+    "sampleName": "SQL注入",
+    "input": "\"; DROP TABLE users; --",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "存储 nickname=\"\\\"; DROP TABLE users; --\" (len=23)"
+  },
+  {
+    "group": "用户.saveUser",
+    "field": "nickname",
+    "sampleName": "XSS脚本",
+    "input": "<script>alert(1)</script>",
+    "status": "FAIL",
+    "severity": "P2",
+    "detail": "XSS 原样存储 → \"<script>alert(1)</script>\""
+  },
+  {
+    "group": "用户.saveUser",
+    "field": "nickname",
+    "sampleName": "中英日韩混合",
+    "input": "西红柿 tomato トマト 토마토",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "存储 nickname=\"西红柿 tomato トマト 토마토\" (len=18)"
+  },
+  {
+    "group": "用户.saveUser",
+    "field": "height",
+    "sampleName": "空字符串",
+    "input": "",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "height=\"\" (持久化=\"\")"
+  },
+  {
+    "group": "用户.saveUser",
+    "field": "height",
+    "sampleName": "数字abc",
+    "input": "abc",
+    "status": "FAIL",
+    "severity": "P1",
+    "detail": "非数字字符串原样存入 height=\"abc\" (持久化=\"abc\")"
+  },
+  {
+    "group": "用户.saveUser",
+    "field": "height",
+    "sampleName": "数字undefined",
+    "input": "undefined",
+    "status": "FAIL",
+    "severity": "P1",
+    "detail": "非数字字符串原样存入 height=\"undefined\" (持久化=\"undefined\")"
+  },
+  {
+    "group": "用户.saveUser",
+    "field": "height",
+    "sampleName": "数字null",
+    "input": "null",
+    "status": "FAIL",
+    "severity": "P1",
+    "detail": "非数字字符串原样存入 height=\"null\" (持久化=\"null\")"
+  },
+  {
+    "group": "用户.saveUser",
+    "field": "height",
+    "sampleName": "负数-1",
+    "input": "-1",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "height=\"-1\" (持久化=\"-1\")"
+  },
+  {
+    "group": "用户.saveUser",
+    "field": "height",
+    "sampleName": "数字0",
+    "input": "0",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "height=\"0\" (持久化=\"0\")"
+  },
+  {
+    "group": "用户.saveUser",
+    "field": "height",
+    "sampleName": "极大值1e308",
+    "input": "1e308",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "height=\"1e308\" (持久化=\"1e308\")"
+  },
+  {
+    "group": "用户.saveUser",
+    "field": "height",
+    "sampleName": "Infinity",
+    "input": "Infinity",
+    "status": "FAIL",
+    "severity": "P1",
+    "detail": "非数字字符串原样存入 height=\"Infinity\" (持久化=\"Infinity\")"
+  },
+  {
+    "group": "用户.saveUser",
+    "field": "height",
+    "sampleName": "NaN",
+    "input": "NaN",
+    "status": "FAIL",
+    "severity": "P1",
+    "detail": "非数字字符串原样存入 height=\"NaN\" (持久化=\"NaN\")"
+  },
+  {
+    "group": "用户.saveUser",
+    "field": "height",
+    "sampleName": "正常数字5",
+    "input": "5",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "height=\"5\" (持久化=\"5\")"
+  },
+  {
+    "group": "用户.saveUser",
+    "field": "weight",
+    "sampleName": "空字符串",
+    "input": "",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "weight=\"\" (持久化=\"\")"
+  },
+  {
+    "group": "用户.saveUser",
+    "field": "weight",
+    "sampleName": "数字abc",
+    "input": "abc",
+    "status": "FAIL",
+    "severity": "P1",
+    "detail": "非数字字符串原样存入 weight=\"abc\" (持久化=\"abc\")"
+  },
+  {
+    "group": "用户.saveUser",
+    "field": "weight",
+    "sampleName": "数字undefined",
+    "input": "undefined",
+    "status": "FAIL",
+    "severity": "P1",
+    "detail": "非数字字符串原样存入 weight=\"undefined\" (持久化=\"undefined\")"
+  },
+  {
+    "group": "用户.saveUser",
+    "field": "weight",
+    "sampleName": "数字null",
+    "input": "null",
+    "status": "FAIL",
+    "severity": "P1",
+    "detail": "非数字字符串原样存入 weight=\"null\" (持久化=\"null\")"
+  },
+  {
+    "group": "用户.saveUser",
+    "field": "weight",
+    "sampleName": "负数-1",
+    "input": "-1",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "weight=\"-1\" (持久化=\"-1\")"
+  },
+  {
+    "group": "用户.saveUser",
+    "field": "weight",
+    "sampleName": "数字0",
+    "input": "0",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "weight=\"0\" (持久化=\"0\")"
+  },
+  {
+    "group": "用户.saveUser",
+    "field": "weight",
+    "sampleName": "极大值1e308",
+    "input": "1e308",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "weight=\"1e308\" (持久化=\"1e308\")"
+  },
+  {
+    "group": "用户.saveUser",
+    "field": "weight",
+    "sampleName": "Infinity",
+    "input": "Infinity",
+    "status": "FAIL",
+    "severity": "P1",
+    "detail": "非数字字符串原样存入 weight=\"Infinity\" (持久化=\"Infinity\")"
+  },
+  {
+    "group": "用户.saveUser",
+    "field": "weight",
+    "sampleName": "NaN",
+    "input": "NaN",
+    "status": "FAIL",
+    "severity": "P1",
+    "detail": "非数字字符串原样存入 weight=\"NaN\" (持久化=\"NaN\")"
+  },
+  {
+    "group": "用户.saveUser",
+    "field": "weight",
+    "sampleName": "正常数字5",
+    "input": "5",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "weight=\"5\" (持久化=\"5\")"
+  },
+  {
+    "group": "用户.saveUser",
+    "field": "age",
+    "sampleName": "空字符串",
+    "input": "",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "age=\"\" (持久化=\"\")"
+  },
+  {
+    "group": "用户.saveUser",
+    "field": "age",
+    "sampleName": "数字abc",
+    "input": "abc",
+    "status": "FAIL",
+    "severity": "P1",
+    "detail": "非数字字符串原样存入 age=\"abc\" (持久化=\"abc\")"
+  },
+  {
+    "group": "用户.saveUser",
+    "field": "age",
+    "sampleName": "数字undefined",
+    "input": "undefined",
+    "status": "FAIL",
+    "severity": "P1",
+    "detail": "非数字字符串原样存入 age=\"undefined\" (持久化=\"undefined\")"
+  },
+  {
+    "group": "用户.saveUser",
+    "field": "age",
+    "sampleName": "数字null",
+    "input": "null",
+    "status": "FAIL",
+    "severity": "P1",
+    "detail": "非数字字符串原样存入 age=\"null\" (持久化=\"null\")"
+  },
+  {
+    "group": "用户.saveUser",
+    "field": "age",
+    "sampleName": "负数-1",
+    "input": "-1",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "age=\"-1\" (持久化=\"-1\")"
+  },
+  {
+    "group": "用户.saveUser",
+    "field": "age",
+    "sampleName": "数字0",
+    "input": "0",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "age=\"0\" (持久化=\"0\")"
+  },
+  {
+    "group": "用户.saveUser",
+    "field": "age",
+    "sampleName": "极大值1e308",
+    "input": "1e308",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "age=\"1e308\" (持久化=\"1e308\")"
+  },
+  {
+    "group": "用户.saveUser",
+    "field": "age",
+    "sampleName": "Infinity",
+    "input": "Infinity",
+    "status": "FAIL",
+    "severity": "P1",
+    "detail": "非数字字符串原样存入 age=\"Infinity\" (持久化=\"Infinity\")"
+  },
+  {
+    "group": "用户.saveUser",
+    "field": "age",
+    "sampleName": "NaN",
+    "input": "NaN",
+    "status": "FAIL",
+    "severity": "P1",
+    "detail": "非数字字符串原样存入 age=\"NaN\" (持久化=\"NaN\")"
+  },
+  {
+    "group": "用户.saveUser",
+    "field": "age",
+    "sampleName": "正常数字5",
+    "input": "5",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "age=\"5\" (持久化=\"5\")"
+  },
+  {
+    "group": "用户.saveUser",
+    "field": "goal",
+    "sampleName": "空字符串",
+    "input": "",
+    "status": "FAIL",
+    "severity": "P2",
+    "detail": "goal 无白名单校验，原样存储 goal=\"\" (合法值=均衡饮食/减脂/增肌/养生)"
+  },
+  {
+    "group": "用户.saveUser",
+    "field": "goal",
+    "sampleName": "纯emoji",
+    "input": "🍎🔄🏳️‍🌈",
+    "status": "FAIL",
+    "severity": "P2",
+    "detail": "goal 无白名单校验，原样存储 goal=\"🍎🔄🏳️‍🌈\" (合法值=均衡饮食/减脂/增肌/养生)"
+  },
+  {
+    "group": "用户.saveUser",
+    "field": "goal",
+    "sampleName": "JSON注入",
+    "input": "{\"$gt\":\"\"}",
+    "status": "FAIL",
+    "severity": "P2",
+    "detail": "goal 无白名单校验，原样存储 goal=\"{\\\"$gt\\\":\\\"\\\"}\" (合法值=均衡饮食/减脂/增肌/养生)"
+  },
+  {
+    "group": "用户.saveUser",
+    "field": "goal",
+    "sampleName": "SQL注入",
+    "input": "\"; DROP TABLE users; --",
+    "status": "FAIL",
+    "severity": "P2",
+    "detail": "goal 无白名单校验，原样存储 goal=\"\\\"; DROP TABLE users; --\" (合法值=均衡饮食/减脂/增肌/养生)"
+  },
+  {
+    "group": "用户.saveUser",
+    "field": "goal",
+    "sampleName": "XSS脚本",
+    "input": "<script>alert(1)</script>",
+    "status": "FAIL",
+    "severity": "P2",
+    "detail": "goal 无白名单校验，原样存储 goal=\"<script>alert(1)</script>\" (合法值=均衡饮食/减脂/增肌/养生)"
+  },
+  {
+    "group": "用户.saveUser",
+    "field": "goal",
+    "sampleName": "特殊字符",
+    "input": "!@#$%^&*()_+-=[]{}|;':\",./<>?`\\",
+    "status": "FAIL",
+    "severity": "P2",
+    "detail": "goal 无白名单校验，原样存储 goal=\"!@#$%^&*()_+-=[]{}|;':\\\",./<>?`\\\\\" (合法值=均衡饮食/减脂/增肌/养生)"
+  },
+  {
+    "group": "NLP.extractFood",
+    "field": "pasteFoodText",
+    "sampleName": "空字符串",
+    "input": "",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "空输入返回空结果 name=\"\""
+  },
+  {
+    "group": "NLP.extractFood",
+    "field": "pasteFoodText",
+    "sampleName": "全空格",
+    "input": "     ",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "空输入返回空结果 name=\"\""
+  },
+  {
+    "group": "NLP.extractFood",
+    "field": "pasteFoodText",
+    "sampleName": "超长100",
+    "input": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa…(+40)",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "无匹配 name=\"\" confidence=0"
+  },
+  {
+    "group": "NLP.extractFood",
+    "field": "pasteFoodText",
+    "sampleName": "超长10000",
+    "input": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa…(+9940)",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "无匹配 name=\"\" confidence=0"
+  },
+  {
+    "group": "NLP.extractFood",
+    "field": "pasteFoodText",
+    "sampleName": "纯emoji",
+    "input": "🍎🔄🏳️‍🌈",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "无匹配 name=\"\" confidence=0"
+  },
+  {
+    "group": "NLP.extractFood",
+    "field": "pasteFoodText",
+    "sampleName": "中英日韩混合",
+    "input": "西红柿 tomato トマト 토마토",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "抽取 name=\"番茄\" qty=1 conf=35"
+  },
+  {
+    "group": "NLP.extractFood",
+    "field": "pasteFoodText",
+    "sampleName": "特殊字符",
+    "input": "!@#$%^&*()_+-=[]{}|;':\",./<>?`\\",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "无匹配 name=\"\" confidence=0"
+  },
+  {
+    "group": "NLP.extractFood",
+    "field": "pasteFoodText",
+    "sampleName": "控制字符",
+    "input": "\n\t\r\u0000",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "无匹配 name=\"\" confidence=0"
+  },
+  {
+    "group": "NLP.extractFood",
+    "field": "pasteFoodText",
+    "sampleName": "零宽字符",
+    "input": "西​红柿",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "无匹配 name=\"\" confidence=0"
+  },
+  {
+    "group": "NLP.extractFood",
+    "field": "pasteFoodText",
+    "sampleName": "组合字符é",
+    "input": "café résumé",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "无匹配 name=\"\" confidence=0"
+  },
+  {
+    "group": "NLP.extractFood",
+    "field": "pasteFoodText",
+    "sampleName": "RTL字符",
+    "input": "مرحبا בעברית",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "无匹配 name=\"\" confidence=0"
+  },
+  {
+    "group": "NLP.extractFood",
+    "field": "pasteFoodText",
+    "sampleName": "HTML实体",
+    "input": "&lt;&amp;&#x27;&quot;",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "抽取 name=\"\" qty=27 conf=20"
+  },
+  {
+    "group": "NLP.extractFood",
+    "field": "pasteFoodText",
+    "sampleName": "JSON注入",
+    "input": "{\"$gt\":\"\"}",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "无匹配 name=\"\" confidence=0"
+  },
+  {
+    "group": "NLP.extractFood",
+    "field": "pasteFoodText",
+    "sampleName": "SQL注入",
+    "input": "\"; DROP TABLE users; --",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "无匹配 name=\"\" confidence=0"
+  },
+  {
+    "group": "NLP.extractFood",
+    "field": "pasteFoodText",
+    "sampleName": "XSS脚本",
+    "input": "<script>alert(1)</script>",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "抽取 name=\"\" qty=1 conf=20"
+  },
+  {
+    "group": "NLP.extractFood",
+    "field": "pasteFoodText",
+    "sampleName": "非法日期",
+    "input": "2026-13-45",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "无匹配 name=\"\" confidence=0"
+  },
+  {
+    "group": "NLP.extractFood",
+    "field": "pasteFoodText",
+    "sampleName": "正常西红柿",
+    "input": "西红柿",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "抽取 name=\"番茄\" qty=1 conf=35"
+  },
+  {
+    "group": "NLP.extractRecipe",
+    "field": "pasteRecipeText",
+    "sampleName": "空字符串",
+    "input": "",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "空输入返回空结果"
+  },
+  {
+    "group": "NLP.extractRecipe",
+    "field": "pasteRecipeText",
+    "sampleName": "全空格",
+    "input": "     ",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "空输入返回空结果"
+  },
+  {
+    "group": "NLP.extractRecipe",
+    "field": "pasteRecipeText",
+    "sampleName": "超长100",
+    "input": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa…(+40)",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "抽取 name=\"aaaaaaaa\" conf=30"
+  },
+  {
+    "group": "NLP.extractRecipe",
+    "field": "pasteRecipeText",
+    "sampleName": "超长10000",
+    "input": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa…(+9940)",
+    "status": "FAIL",
+    "severity": "P2",
+    "detail": "超长文本首段进 name=\"aaaaaaaa\" (len=8)"
+  },
+  {
+    "group": "NLP.extractRecipe",
+    "field": "pasteRecipeText",
+    "sampleName": "纯emoji",
+    "input": "🍎🔄🏳️‍🌈",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "抽取 name=\"🍎🔄🏳️‍🌈\" conf=30"
+  },
+  {
+    "group": "NLP.extractRecipe",
+    "field": "pasteRecipeText",
+    "sampleName": "中英日韩混合",
+    "input": "西红柿 tomato トマト 토마토",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "抽取 name=\"西红柿\" conf=50"
+  },
+  {
+    "group": "NLP.extractRecipe",
+    "field": "pasteRecipeText",
+    "sampleName": "特殊字符",
+    "input": "!@#$%^&*()_+-=[]{}|;':\",./<>?`\\",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "抽取 name=\"!@#$%^&*\" conf=30"
+  },
+  {
+    "group": "NLP.extractRecipe",
+    "field": "pasteRecipeText",
+    "sampleName": "控制字符",
+    "input": "\n\t\r\u0000",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "抽取 name=\"\" conf=0"
+  },
+  {
+    "group": "NLP.extractRecipe",
+    "field": "pasteRecipeText",
+    "sampleName": "零宽字符",
+    "input": "西​红柿",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "抽取 name=\"西​红柿\" conf=30"
+  },
+  {
+    "group": "NLP.extractRecipe",
+    "field": "pasteRecipeText",
+    "sampleName": "组合字符é",
+    "input": "café résumé",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "抽取 name=\"café\" conf=30"
+  },
+  {
+    "group": "NLP.extractRecipe",
+    "field": "pasteRecipeText",
+    "sampleName": "RTL字符",
+    "input": "مرحبا בעברית",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "抽取 name=\"مرحبا\" conf=30"
+  },
+  {
+    "group": "NLP.extractRecipe",
+    "field": "pasteRecipeText",
+    "sampleName": "HTML实体",
+    "input": "&lt;&amp;&#x27;&quot;",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "抽取 name=\"&lt\" conf=30"
+  },
+  {
+    "group": "NLP.extractRecipe",
+    "field": "pasteRecipeText",
+    "sampleName": "JSON注入",
+    "input": "{\"$gt\":\"\"}",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "抽取 name=\"{\\\"$gt\\\":\\\"\\\"}\" conf=30"
+  },
+  {
+    "group": "NLP.extractRecipe",
+    "field": "pasteRecipeText",
+    "sampleName": "SQL注入",
+    "input": "\"; DROP TABLE users; --",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "抽取 name=\"\" conf=0"
+  },
+  {
+    "group": "NLP.extractRecipe",
+    "field": "pasteRecipeText",
+    "sampleName": "XSS脚本",
+    "input": "<script>alert(1)</script>",
+    "status": "FAIL",
+    "severity": "P2",
+    "detail": "脏数据泄漏到 name=\"<script>\" (会进 recipeForm.name)"
+  },
+  {
+    "group": "NLP.extractRecipe",
+    "field": "pasteRecipeText",
+    "sampleName": "非法日期",
+    "input": "2026-13-45",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "抽取 name=\"2026-13-45\" conf=30"
+  },
+  {
+    "group": "NLP.extractRecipe",
+    "field": "pasteRecipeText",
+    "sampleName": "正常西红柿",
+    "input": "西红柿",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "抽取 name=\"西红柿\" conf=50"
+  },
+  {
+    "group": "扫码",
+    "field": "barcodeInput",
+    "sampleName": "空字符串",
+    "input": "",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "被正则/DB拦截: 请输入条形码"
+  },
+  {
+    "group": "扫码",
+    "field": "barcodeInput",
+    "sampleName": "纯字母",
+    "input": "abcdefgh",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "被正则/DB拦截: 条形码格式不正确（8-20位数字）"
+  },
+  {
+    "group": "扫码",
+    "field": "barcodeInput",
+    "sampleName": "字母数字混合",
+    "input": "abc12345",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "被正则/DB拦截: 条形码格式不正确（8-20位数字）"
+  },
+  {
+    "group": "扫码",
+    "field": "barcodeInput",
+    "sampleName": "短数字",
+    "input": "123",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "被正则/DB拦截: 条形码格式不正确（8-20位数字）"
+  },
+  {
+    "group": "扫码",
+    "field": "barcodeInput",
+    "sampleName": "7位数字",
+    "input": "1234567",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "被正则/DB拦截: 条形码格式不正确（8-20位数字）"
+  },
+  {
+    "group": "扫码",
+    "field": "barcodeInput",
+    "sampleName": "8位数字(合法但DB无)",
+    "input": "12345678",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "被正则/DB拦截: 未识别此条形码，请手动输入"
+  },
+  {
+    "group": "扫码",
+    "field": "barcodeInput",
+    "sampleName": "13位合法",
+    "input": "6901234567890",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "命中: \"伊利纯牛奶 250ml\""
+  },
+  {
+    "group": "扫码",
+    "field": "barcodeInput",
+    "sampleName": "21位超长数字",
+    "input": "111111111111111111111",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "被正则/DB拦截: 条形码格式不正确（8-20位数字）"
+  },
+  {
+    "group": "扫码",
+    "field": "barcodeInput",
+    "sampleName": "含空格",
+    "input": "6901234567890 ",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "命中: \"伊利纯牛奶 250ml\""
+  },
+  {
+    "group": "扫码",
+    "field": "barcodeInput",
+    "sampleName": "含特殊字符",
+    "input": "69012345!@#",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "被正则/DB拦截: 条形码格式不正确（8-20位数字）"
+  },
+  {
+    "group": "扫码",
+    "field": "barcodeInput",
+    "sampleName": "SQL注入",
+    "input": "\"; DROP TABLE;",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "被正则/DB拦截: 条形码格式不正确（8-20位数字）"
+  },
+  {
+    "group": "扫码",
+    "field": "barcodeInput",
+    "sampleName": "XSS",
+    "input": "<script>1</script>",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "被正则/DB拦截: 条形码格式不正确（8-20位数字）"
+  },
+  {
+    "group": "扫码",
+    "field": "barcodeInput",
+    "sampleName": "纯emoji",
+    "input": "🍎🍎🍎",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "被正则/DB拦截: 条形码格式不正确（8-20位数字）"
+  },
+  {
+    "group": "扫码",
+    "field": "barcodeInput",
+    "sampleName": "超大数字1e308",
+    "input": "1e308",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "被正则/DB拦截: 条形码格式不正确（8-20位数字）"
+  },
+  {
+    "group": "扫码",
+    "field": "barcodeInput",
+    "sampleName": "负数",
+    "input": "-6901234567890",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "被正则/DB拦截: 条形码格式不正确（8-20位数字）"
+  },
+  {
+    "group": "扫码",
+    "field": "barcodeInput",
+    "sampleName": "正常8位",
+    "input": "69012345",
+    "status": "PASS",
+    "severity": "P3",
+    "detail": "被正则/DB拦截: 未识别此条形码，请手动输入"
+  }
+]
