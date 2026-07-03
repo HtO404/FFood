@@ -40,16 +40,18 @@
     </div>
 
     <Transition name="toolbar-slide">
-      <div v-if="batchMode" class="batch-toolbar">
-        <span class="batch-info">已选 {{ selectedIds.size }} / {{ filteredFoods.length }}</span>
-        <button class="batch-btn batch-select-all" @click="toggleSelectAll">{{ allSelected ? '取消全选' : '全选' }}</button>
-        <button class="batch-btn batch-mark" :disabled="selectedIds.size === 0" @click="batchMarkConsumed">标记已消耗</button>
-        <button class="batch-btn batch-delete" :disabled="selectedIds.size === 0" @click="batchDelete">🗑️ 删除</button>
+      <div v-if="batchMode" class="batch-toolbar-fixed">
+        <div class="batch-toolbar-inner">
+          <button class="batch-btn" @click="toggleSelectAll">{{ allSelected ? '取消全选' : '全选' }}</button>
+          <span class="batch-info">已选 {{ selectedIds.size }}</span>
+          <button class="batch-btn batch-delete" :disabled="selectedIds.size === 0" @click="batchDelete">删除</button>
+          <button class="batch-btn batch-done" @click="exitBatchMode">完成</button>
+        </div>
       </div>
     </Transition>
 
     <!-- ==================== 食材列表 Tab ==================== -->
-    <div class="food-list" v-if="activeTab === 'food' && groupedFoods.length">
+    <div :class="['food-list', { 'batch-active': batchMode }]" v-if="activeTab === 'food' && groupedFoods.length">
       <div v-for="group in groupedFoods" :key="group.category" class="food-group">
         <div class="group-header">
           <span class="group-emoji">{{ getCategoryEmoji(group.category) }}</span>
@@ -58,14 +60,20 @@
         </div>
         <TransitionGroup name="food-card" tag="div" class="group-items">
           <div class="food-card-wrapper" v-for="food in group.items" :key="food.id"
-            @touchstart="touchStart($event, food.id)" @touchmove="touchMove($event, food.id)" @touchend="touchEnd($event, food.id)">
+            @touchstart="touchStart($event, food.id)" @touchmove="touchMove($event, food.id)" @touchend="touchEnd($event, food.id)"
+            @mousedown="mouseStart($event, food.id)" @mouseup="mouseEnd($event, food.id)" @mouseleave="mouseLeave(food.id)"
+            @contextmenu.prevent>
             <div class="food-card-actions">
-              <button class="food-action-btn food-action-delete" @click.stop="confirmDelete(food)" title="删除">🗑️</button>
+              <button class="food-action-btn food-action-delete" @click.stop="confirmDelete(food)" title="删除">
+                <span class="action-emoji">🗑️</span><span class="action-label">删除</span>
+              </button>
             </div>
-            <div :class="['food-card', { expired: food.daysLeft < 0, warning: food.daysLeft >= 0 && food.daysLeft <= 1, selected: batchMode && selectedIds.has(food.id), 'swipe-open': swipedId === food.id }]"
+            <div :class="['food-card', { 'swipe-open': swipedId === food.id, selected: selectedIds.has(food.id) }]"
               @click="handleCardClick(food)" :style="cardStyle(food.id)">
               <div v-if="batchMode" class="food-checkbox" @click.stop>
-                <div :class="['checkbox-icon', { checked: selectedIds.has(food.id) }]"><span v-if="selectedIds.has(food.id)">✓</span></div>
+                <div :class="['checkbox-icon', { checked: selectedIds.has(food.id) }]">
+                  <span v-if="selectedIds.has(food.id)">✓</span>
+                </div>
               </div>
               <div class="food-info">
                 <div class="food-name">{{ food.name }}</div>
@@ -115,10 +123,19 @@
 
     <!-- ==================== 菜谱推荐 Tab (P2-2) ==================== -->
     <div class="recipe-list" v-if="activeTab === 'recipes'">
-      <div class="recipe-hint" v-if="foodStore.totalCount > 0">
-        🧑‍🍳 基于冰箱里的 <strong>{{ foodStore.totalCount }}</strong> 件食材，为你推荐：
+      <div class="recipe-header-bar">
+        <div class="recipe-hint" v-if="foodStore.totalCount > 0">
+          🧑‍🍳 基于冰箱里的 <strong>{{ foodStore.totalCount }}</strong> 件食材，猜你喜欢：
+        </div>
+        <div class="recipe-hint" v-else>🧑‍🍳 冰箱还是空的，先添加食材才能匹配菜谱哦～</div>
+        <button class="btn-add-recipe" @click="openRecipeModal">+ 自定义菜谱</button>
       </div>
-      <div class="recipe-hint" v-else>🧑‍🍳 冰箱还是空的，先添加食材才能匹配菜谱哦～</div>
+
+      <div class="recipe-empty" v-if="recommendedRecipes.length === 0 && foodStore.totalCount > 0">
+        <div class="empty-icon">🍳</div>
+        <div class="empty-text">现有食材还没法匹配菜谱</div>
+        <div class="empty-hint">添加更多常用食材，或点击右上角自定义菜谱</div>
+      </div>
 
       <div class="recipe-card" v-for="r in recommendedRecipes" :key="r.id" @click="toggleRecipeDetail(r.id)">
         <div class="recipe-header">
@@ -130,6 +147,12 @@
           <div :class="['recipe-match-badge', r.ratio >= 1 ? 'match-full' : r.ratio >= 0.5 ? 'match-high' : 'match-low']">
             {{ r.ratio >= 1 ? '✅ 全部齐备' : `缺${r.unmatched.length}种` }}
           </div>
+        </div>
+        <div class="recipe-ingredients-preview">
+          <span v-for="ing in r.ingredients" :key="ing"
+            :class="['ingredient-tag', r.matched.includes(ing) ? 'ingredient-have' : 'ingredient-miss']">
+            {{ r.matched.includes(ing) ? '✅' : '❌' }} {{ ing }}
+          </span>
         </div>
         <Transition name="expand">
           <div v-if="expandedRecipe === r.id" class="recipe-body">
@@ -152,6 +175,9 @@
             <div class="recipe-actions">
               <button class="btn-recipe-shop" @click.stop="addMissingToShopList(r)">
                 📝 缺的食材加入购物清单
+              </button>
+              <button v-if="!r.id.startsWith('r')" class="btn-recipe-delete" @click.stop="removeRecipe(r.id)">
+                🗑️ 删除
               </button>
             </div>
           </div>
@@ -311,6 +337,45 @@
       </div>
     </Transition>
 
+    <!-- 自定义菜谱弹窗 -->
+    <Transition name="modal">
+      <div v-if="showRecipeModal" class="modal-overlay" @click.self="closeRecipeModal">
+        <div class="modal-sheet">
+          <div class="modal-handle" /><h3 class="modal-title">🍳 自定义菜谱</h3>
+          <div class="form-group">
+            <label class="form-label">菜谱名称 *</label>
+            <input v-model="recipeForm.name" class="form-input" placeholder="例：番茄炒蛋" maxlength="20" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">emoji</label>
+            <input v-model="recipeForm.emoji" class="form-input" placeholder="🍳" maxlength="2" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">难度</label>
+            <div class="difficulty-picker">
+              <button v-for="d in difficultyOptions" :key="d" :class="['difficulty-chip', { active: recipeForm.difficulty === d }]" @click="recipeForm.difficulty = d">{{ d }}</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">时间（分钟）</label>
+            <input v-model="recipeForm.time" type="number" class="form-input" min="1" max="300" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">所需食材（用逗号分隔）</label>
+            <input v-model="recipeForm.ingredientsText" class="form-input" placeholder="鸡蛋, 番茄, 葱" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">做法步骤（每行一步）</label>
+            <textarea v-model="recipeForm.stepsText" class="form-textarea" rows="4" placeholder="1. 鸡蛋打散..." />
+          </div>
+          <div class="modal-actions">
+            <button class="btn-cancel" @click="closeRecipeModal">取消</button>
+            <button class="btn-save" @click="saveRecipe" :disabled="!isRecipeFormValid">保存</button>
+          </div>
+        </div>
+      </div>
+    </Transition>
+
     <!-- 删除确认 -->
     <Transition name="modal">
       <div v-if="deleteTarget" class="modal-overlay" @click.self="deleteTarget = null">
@@ -356,18 +421,20 @@ const units = ['个', 'kg', '份']
 const storageFilterOptions = [
   { key:'all', label:'全部位置' }, { key:'冷藏', label:'❄️ 冷藏' }, { key:'冷冻', label:'🧊 冷冻' }, { key:'常温', label:'🏠 常温' },
 ]
+const difficultyOptions = ['超简单', '简单', '中等', '困难']
 const todayStr = new Date().toISOString().slice(0, 10)
 
 // ========== Tab ==========
 const activeTab = ref('food')
-function switchTab(tab) { activeTab.value = tab; if (tab === 'food') { batchMode.value = false; selectedIds.value = new Set() } }
+function switchTab(tab) { activeTab.value = tab; if (tab === 'food') { exitBatchMode() } }
 
 // ========== 搜索 & 筛选 ==========
 const searchText = ref(''); const activeCategory = ref('all'); const activeStorage = ref('all')
 
-// ========== 批量 ==========
+// ========== 批量（购物车式多选） ==========
 const batchMode = ref(false); const selectedIds = ref(new Set()); const batchDeleteTarget = ref('')
 function toggleBatchMode() { batchMode.value = !batchMode.value; if (!batchMode.value) selectedIds.value = new Set() }
+function exitBatchMode() { batchMode.value = false; selectedIds.value = new Set() }
 function toggleSelectAll() { selectedIds.value = allSelected.value ? new Set() : new Set(filteredFoods.value.map(f => f.id)) }
 const allSelected = computed(() => filteredFoods.value.length > 0 && selectedIds.value.size === filteredFoods.value.length)
 function handleCardClick(food) {
@@ -375,20 +442,30 @@ function handleCardClick(food) {
   if (batchMode.value) { const s = new Set(selectedIds.value); if (s.has(food.id)) s.delete(food.id); else s.add(food.id); selectedIds.value = s }
   else editFood(food)
 }
+function batchDelete() { if (selectedIds.value.size > 0) batchDeleteTarget.value = `删除 ${selectedIds.value.size} 件食材` }
+function doBatchDelete() { foodStore.removeFoods([...selectedIds.value]); selectedIds.value = new Set(); batchDeleteTarget.value = ''; batchMode.value = false }
 
-// ========== 列表滑动删除 ==========
-const swipedId = ref(null)
-const touchMap = new Map()
-const SWIPE_THRESHOLD = -64
-
-function cardStyle(id) {
-  const x = swipedId.value === id ? SWIPE_THRESHOLD : 0
-  return { transform: `translateX(${x}px)`, transition: 'transform 0.25s cubic-bezier(0.25, 0.1, 0.25, 1)' }
+// ========== 长按进入多选 ==========
+const longPressTimer = ref(null)
+const LONG_PRESS_MS = 550
+function startLongPress(id) {
+  clearLongPress()
+  longPressTimer.value = setTimeout(() => {
+    if (!batchMode.value) {
+      batchMode.value = true
+      selectedIds.value = new Set([id])
+    }
+    longPressTimer.value = null
+  }, LONG_PRESS_MS)
+}
+function clearLongPress() {
+  if (longPressTimer.value) { clearTimeout(longPressTimer.value); longPressTimer.value = null }
 }
 function touchStart(e, id) {
   if (batchMode.value) return
   const t = e.touches[0]
   touchMap.set(id, { startX: t.clientX, startY: t.clientY, time: Date.now() })
+  startLongPress(id)
 }
 function touchMove(e, id) {
   if (batchMode.value || !touchMap.has(id)) return
@@ -396,6 +473,7 @@ function touchMove(e, id) {
   const state = touchMap.get(id)
   const dx = t.clientX - state.startX
   const dy = t.clientY - state.startY
+  if (Math.abs(dy) > 10 || Math.abs(dx) > 10) clearLongPress()
   if (Math.abs(dy) > Math.abs(dx)) return
   e.preventDefault()
   const card = e.currentTarget.querySelector('.food-card')
@@ -403,6 +481,7 @@ function touchMove(e, id) {
   else card.style.transform = `translateX(${Math.min(dx, 0)}px)`
 }
 function touchEnd(e, id) {
+  clearLongPress()
   if (batchMode.value || !touchMap.has(id)) return
   const t = e.changedTouches[0]
   const state = touchMap.get(id)
@@ -412,10 +491,27 @@ function touchEnd(e, id) {
   if (dx < SWIPE_THRESHOLD) { swipedId.value = id } else { swipedId.value = null }
   touchMap.delete(id)
 }
+function mouseStart(e, id) {
+  if (batchMode.value || e.button !== 0) return
+  startLongPress(id)
+  mouseMap.set(id, { x: e.clientX, y: e.clientY })
+}
+function mouseEnd(e, id) {
+  clearLongPress()
+  mouseMap.delete(id)
+}
+function mouseLeave(id) { clearLongPress(); mouseMap.delete(id) }
 
-function batchDelete() { if (selectedIds.value.size > 0) batchDeleteTarget.value = `删除 ${selectedIds.value.size} 件食材` }
-function doBatchDelete() { foodStore.removeFoods([...selectedIds.value]); selectedIds.value = new Set(); batchDeleteTarget.value = ''; batchMode.value = false }
-function batchMarkConsumed() { if (selectedIds.value.size) { foodStore.markConsumed([...selectedIds.value]); selectedIds.value = new Set() } }
+// ========== 列表滑动删除 ==========
+const swipedId = ref(null)
+const touchMap = new Map()
+const mouseMap = new Map()
+const SWIPE_THRESHOLD = -64
+
+function cardStyle(id) {
+  const x = swipedId.value === id ? SWIPE_THRESHOLD : 0
+  return { transform: `translateX(${x}px)`, transition: 'transform 0.25s cubic-bezier(0.25, 0.1, 0.25, 1)' }
+}
 
 // ========== 统计 ==========
 const showStatsPanel = ref(false)
@@ -454,6 +550,26 @@ function saveFood() {
 }
 function confirmDelete(food) { deleteTarget.value = food }
 function doDelete() { if (deleteTarget.value) { foodStore.removeFood(deleteTarget.value.id); deleteTarget.value = null } }
+
+// ========== 自定义菜谱 ==========
+const showRecipeModal = ref(false)
+const recipeForm = ref({ name:'', emoji:'🍳', difficulty:'简单', time:15, ingredientsText:'', stepsText:'' })
+const isRecipeFormValid = computed(() => recipeForm.value.name.trim() && recipeForm.value.ingredientsText.trim())
+function openRecipeModal() { recipeForm.value = { name:'', emoji:'🍳', difficulty:'简单', time:15, ingredientsText:'', stepsText:'' }; showRecipeModal.value = true }
+function closeRecipeModal() { showRecipeModal.value = false }
+function saveRecipe() {
+  if (!isRecipeFormValid.value) return
+  foodStore.addRecipe({
+    name: recipeForm.value.name,
+    emoji: recipeForm.value.emoji,
+    difficulty: recipeForm.value.difficulty,
+    time: recipeForm.value.time,
+    ingredients: recipeForm.value.ingredientsText.split(/[,，]/).map(s => s.trim()).filter(Boolean),
+    steps: recipeForm.value.stepsText.split(/\n/).map(s => s.trim()).filter(Boolean),
+  })
+  closeRecipeModal()
+}
+function removeRecipe(id) { foodStore.removeRecipe(id) }
 
 // ========== 列表 ==========
 const filteredFoods = computed(() => {
@@ -520,7 +636,7 @@ function addFromBarcode() {
 
 // ========== 工具 ==========
 function formatDate(d) { if (!d) return ''; const dt = new Date(d); return `${dt.getMonth()+1}/${dt.getDate()}` }
-function expiryClass(d) { if (d<0) return 'badge-expired'; if (d===0) return 'badge-today'; if (d<=1) return 'badge-warning'; return 'badge-fresh' }
+function expiryClass(d) { if (d<0) return 'badge-expired'; if (d===0) return 'badge-today'; if (d<=3) return 'badge-warning'; return 'badge-fresh' }
 function expiryLabel(d) { if (d<0) return `已过期${Math.abs(d)}天`; if (d===0) return '今天到期'; if (d===1) return '明天到期'; return `${d}天后` }
 function getCategoryEmoji(c) { return filterCategories.find(x => x.key === c)?.emoji || '📦' }
 function storageIcon(s) { return s==='冷藏'?'❄️':s==='冷冻'?'🧊':'🏠' }
@@ -535,5 +651,5 @@ function checkExpiryNotification() {
 function requestNotification() { if ('Notification' in window && Notification.permission==='default') Notification.requestPermission().then(p=>{if(p==='granted') checkExpiryNotification()}) }
 function startNotificationTimer() { if (nt) clearInterval(nt); nt = setInterval(checkExpiryNotification, 1000*60*60*4) }
 
-onMounted(() => { foodStore.load(); foodStore.loadTemplates(); foodStore.loadShopList(); requestNotification(); checkExpiryNotification(); startNotificationTimer() })
+onMounted(() => { foodStore.load(); foodStore.loadTemplates(); foodStore.loadShopList(); foodStore.loadRecipes(); requestNotification(); checkExpiryNotification(); startNotificationTimer() })
 </script>

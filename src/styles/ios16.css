@@ -295,16 +295,27 @@ select:focus {
 }
 
 .food-action-btn {
-  width: 88px;
+  width: 80px;
   border: none;
   background: transparent;
   color: var(--text-inverse);
-  font-size: 26px;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 4px;
   cursor: pointer;
   transition: background 0.15s;
+}
+
+.food-action-btn .action-emoji {
+  font-size: 26px;
+  line-height: 1;
+}
+
+.food-action-btn .action-label {
+  font-size: 11px;
+  font-weight: 500;
 }
 
 .food-action-btn:active {
@@ -317,7 +328,7 @@ select:focus {
   gap: var(--spacing-md);
   padding: 14px 16px;
   border-radius: var(--radius-md);
-  background: var(--bg-card);
+  background: #ffffff;
   backdrop-filter: var(--blur-card);
   -webkit-backdrop-filter: var(--blur-card);
   box-shadow: var(--shadow-sm);
@@ -329,27 +340,9 @@ select:focus {
   will-change: transform;
 }
 
-.food-card::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 4px;
-  border-radius: 0 3px 3px 0;
-  transition: background 0.3s;
-}
-
-.food-card.expired::before {
-  background: var(--red);
-}
-
-.food-card.warning::before {
-  background: var(--orange);
-}
-
-.food-card:not(.expired):not(.warning)::before {
-  background: var(--green);
+.food-card.selected {
+  background: rgba(52, 199, 89, 0.08);
+  box-shadow: inset 0 0 0 1.5px var(--green);
 }
 
 .food-card:active {
@@ -400,7 +393,7 @@ select:focus {
 }
 
 .badge-today {
-  background: rgba(255, 149, 0, 0.12);
+  background: rgba(255, 149, 0, 0.14);
   color: var(--orange);
 }
 
@@ -1054,12 +1047,13 @@ select.form-input {
 }
 
 .checkbox-icon.checked {
-  background: var(--blue);
-  border-color: var(--blue);
+  background: var(--green);
+  border-color: var(--green);
 }
 
 .food-card.selected {
-  background: rgba(0, 122, 255, 0.06);
+  background: rgba(52, 199, 89, 0.08);
+  box-shadow: inset 0 0 0 1.5px var(--green);
 }
 
 /* ===== 统计面板 (P1-4) ===== */
@@ -1643,6 +1637,195 @@ select.form-input {
 
 .test-barcode-chip:active { background: var(--blue); color: var(--text-inverse); }
 
+/* ===== 批量操作固定工具栏 ===== */
+.batch-toolbar-fixed {
+  position: fixed;
+  bottom: max(56px, calc(env(safe-area-inset-bottom) + 52px));
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(480px, 100vw);
+  z-index: var(--z-tabbar);
+  padding: 0 var(--spacing-md) 8px;
+  pointer-events: none;
+}
+
+.batch-toolbar-inner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: var(--bg-elevated);
+  backdrop-filter: var(--blur-bg);
+  -webkit-backdrop-filter: var(--blur-bg);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  pointer-events: auto;
+}
+
+.batch-toolbar-inner .batch-info {
+  flex: 1;
+  text-align: center;
+  font-size: var(--font-subhead);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.batch-toolbar-inner .batch-btn {
+  padding: 7px 14px;
+  border: none;
+  border-radius: 10px;
+  font-size: var(--font-subhead);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.batch-toolbar-inner .batch-done {
+  background: var(--blue);
+  color: var(--text-inverse);
+}
+
+.batch-toolbar-inner .batch-delete {
+  background: rgba(255, 59, 48, 0.1);
+  color: var(--red);
+}
+
+.batch-toolbar-inner .batch-delete:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ===== 多选模式下列表底部间距 ===== */
+.food-list.batch-active {
+  padding-bottom: 140px;
+}
+
+/* ===== 自定义菜谱弹窗 ===== */
+.difficulty-picker {
+  display: flex;
+  gap: var(--spacing-xs);
+  flex-wrap: wrap;
+}
+
+.difficulty-chip {
+  padding: 8px 14px;
+  border: none;
+  border-radius: 10px;
+  background: rgba(142, 142, 147, 0.08);
+  font-size: var(--font-subhead);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.difficulty-chip:active {
+  transform: scale(0.96);
+}
+
+.difficulty-chip.active {
+  background: var(--blue);
+  color: var(--text-inverse);
+}
+
+.form-textarea {
+  width: 100%;
+  min-height: 100px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: rgba(142, 142, 147, 0.08);
+  padding: 12px 14px;
+  font-size: var(--font-callout);
+  color: var(--text-primary);
+  resize: vertical;
+  transition: background 0.2s;
+  -webkit-appearance: none;
+  appearance: none;
+  font-family: inherit;
+}
+
+.form-textarea:focus {
+  background: rgba(0, 122, 255, 0.06);
+  box-shadow: inset 0 0 0 2px var(--blue);
+  outline: none;
+}
+
+/* ===== 菜谱页头部 ===== */
+.recipe-header-bar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+}
+
+.recipe-header-bar .recipe-hint {
+  margin-bottom: 0;
+}
+
+.btn-add-recipe {
+  align-self: flex-start;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 20px;
+  background: var(--blue);
+  color: var(--text-inverse);
+  font-size: var(--font-subhead);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn-add-recipe:active {
+  background: #0066d6;
+}
+
+/* ===== 菜谱空状态 ===== */
+.recipe-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 20px;
+  text-align: center;
+}
+
+.recipe-empty .empty-icon {
+  font-size: 56px;
+  margin-bottom: var(--spacing-md);
+  opacity: 0.6;
+}
+
+.recipe-empty .empty-text {
+  font-size: var(--font-title3);
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-xs);
+}
+
+.recipe-empty .empty-hint {
+  font-size: var(--font-subhead);
+  color: var(--text-tertiary);
+}
+
+/* ===== 菜谱删除按钮 ===== */
+.btn-recipe-delete {
+  width: 100%;
+  margin-top: 10px;
+  padding: 10px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: rgba(255, 59, 48, 0.08);
+  color: var(--red);
+  font-size: var(--font-subhead);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.btn-recipe-delete:active {
+  background: rgba(255, 59, 48, 0.18);
+}
+
 /* ===== 响应式 ===== */
 @media (max-width: 480px) {
   .app { padding: 0 var(--spacing-sm) 120px; }
@@ -1651,5 +1834,3 @@ select.form-input {
 @media (min-width: 481px) {
   .modal-sheet { border-radius: var(--radius-xl); margin-bottom: var(--spacing-lg); }
 }
-
-/* ===== 响应式 ===== */

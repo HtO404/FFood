@@ -3,6 +3,7 @@ import { reactive } from 'vue'
 const STORAGE_KEY = 'ffood_data'
 const TEMPLATES_KEY = 'ffood_templates'
 const SHOPLIST_KEY = 'ffood_shoplist'
+const RECIPES_KEY = 'ffood_recipes'
 const MAX_TEMPLATES = 20
 
 // ═════════ P2-2 菜谱 ═════════
@@ -285,9 +286,56 @@ class FoodStore {
         ![...foodNames].some(fn => fn.includes(ing) || ing.includes(fn))
       )
       const ratio = r.ingredients.length > 0 ? matched.length / r.ingredients.length : 0
-      results.push({ ...r, matchedCount: matched.length, matched, unmatched, ratio })
+      if (matched.length > 0) {
+        results.push({ ...r, matchedCount: matched.length, matched, unmatched, ratio })
+      }
     }
     return results.sort((a, b) => b.ratio - a.ratio || b.matchedCount - a.matchedCount)
+  }
+
+  addRecipe(recipe) {
+    const r = {
+      id: genId(),
+      name: recipe.name.trim(),
+      category: recipe.category || '其他',
+      emoji: recipe.emoji || '🍳',
+      difficulty: recipe.difficulty || '简单',
+      time: parseInt(recipe.time) || 15,
+      ingredients: recipe.ingredients.filter(i => i.trim()).map(i => i.trim()),
+      steps: recipe.steps.filter(s => s.trim()).map(s => s.trim()),
+    }
+    this.state.recipes.unshift(r)
+    this.saveRecipes()
+    return r
+  }
+
+  removeRecipe(id) {
+    this.state.recipes = this.state.recipes.filter(r => r.id !== id)
+    this.saveRecipes()
+  }
+
+  saveRecipes() {
+    try {
+      const custom = this.state.recipes.filter(r => !r.id.startsWith('r'))
+      localStorage.setItem(RECIPES_KEY, JSON.stringify(custom))
+    } catch (e) {
+      console.error('[FFood] 菜谱保存失败:', e)
+    }
+  }
+
+  loadRecipes() {
+    try {
+      const raw = localStorage.getItem(RECIPES_KEY)
+      if (raw) {
+        const custom = JSON.parse(raw)
+        // 内置菜谱 id 为 r1...r12，自定义 id 为 genId 生成，去重避免重复加载
+        const builtinIds = new Set(RECIPES.map(r => r.id))
+        const merged = [...custom.filter(r => !builtinIds.has(r.id)), ...RECIPES]
+        this.state.recipes = merged
+      }
+    } catch (e) {
+      console.error('[FFood] 菜谱加载失败:', e)
+    }
   }
 
   // ==================== 条形码 (P2-3) ====================
