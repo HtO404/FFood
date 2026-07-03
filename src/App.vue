@@ -30,29 +30,60 @@
         @click="activeCategory = cat.key">{{ cat.emoji }} {{ cat.label }}</button>
     </div>
 
-    <!-- 存储筛选 + 批量 -->
+    <!-- 存储筛选 + 排序 + 批量 -->
     <div class="storage-filter-row" v-if="activeTab === 'food' && activeCategory === 'all'">
       <div class="storage-filter-scroll">
         <button v-for="s in storageFilterOptions" :key="s.key"
           :class="['storage-filter-chip', { active: activeStorage === s.key }]" @click="activeStorage = s.key">{{ s.label }}</button>
       </div>
-      <button v-if="foodStore.totalCount > 0" :class="['batch-toggle-btn', { active: batchMode }]" @click="toggleBatchMode">
-        {{ batchMode ? '完成' : '多选' }}</button>
+      <button v-if="foodStore.totalCount > 0" :class="['batch-toggle-btn', { active: foodBatch.batchMode.value }]" @click="foodBatch.toggleBatchMode()">
+        {{ foodBatch.batchMode.value ? '完成' : '多选' }}
+      </button>
+    </div>
+
+    <!-- 食材排序栏 -->
+    <div class="sort-bar" v-if="activeTab === 'food' && foodStore.totalCount > 0">
+      <span class="sort-label">排序</span>
+      <button v-for="s in sortOptions" :key="s.key"
+        :class="['sort-chip', { active: sortBy === s.key }]"
+        @click="setSortBy(s.key)">{{ s.label }}</button>
     </div>
 
     <Transition name="toolbar-slide">
-      <div v-if="batchMode" class="batch-toolbar-fixed">
+      <div v-if="foodBatch.batchMode.value" class="batch-toolbar-fixed">
         <div class="batch-toolbar-inner">
-          <button class="batch-btn" @click="toggleSelectAll">{{ allSelected ? '取消全选' : '全选' }}</button>
-          <span class="batch-info">已选 {{ selectedIds.size }}</span>
-          <button class="batch-btn batch-delete" :disabled="selectedIds.size === 0" @click="batchDelete">删除</button>
-          <button class="batch-btn batch-done" @click="exitBatchMode">完成</button>
+          <button class="batch-btn" @click="foodBatch.toggleSelectAll()">{{ foodBatch.allSelected.value ? '取消全选' : '全选' }}</button>
+          <span class="batch-info">已选 {{ foodBatch.selectedIds.value.size }}</span>
+          <button class="batch-btn batch-delete" :disabled="foodBatch.selectedIds.value.size === 0" @click="onFoodBatchDelete">删除</button>
+          <button class="batch-btn batch-done" @click="foodBatch.exitBatchMode()">完成</button>
+        </div>
+      </div>
+    </Transition>
+
+    <Transition name="toolbar-slide">
+      <div v-if="shopBatch.batchMode.value" class="batch-toolbar-fixed">
+        <div class="batch-toolbar-inner">
+          <button class="batch-btn" @click="shopBatch.toggleSelectAll()">{{ shopBatch.allSelected.value ? '取消全选' : '全选' }}</button>
+          <span class="batch-info">已选 {{ shopBatch.selectedIds.value.size }}</span>
+          <button class="batch-btn batch-delete" :disabled="shopBatch.selectedIds.value.size === 0" @click="onShopBatchDelete">删除</button>
+          <button class="batch-btn batch-done" @click="shopBatch.exitBatchMode()">完成</button>
+        </div>
+      </div>
+    </Transition>
+
+    <Transition name="toolbar-slide">
+      <div v-if="recipeBatch.batchMode.value" class="batch-toolbar-fixed">
+        <div class="batch-toolbar-inner">
+          <button class="batch-btn" @click="recipeBatch.toggleSelectAll()">{{ recipeBatch.allSelected.value ? '取消全选' : '全选' }}</button>
+          <span class="batch-info">已选 {{ recipeBatch.selectedIds.value.size }}（仅自定义可删）</span>
+          <button class="batch-btn batch-delete" :disabled="recipeBatch.selectedIds.value.size === 0" @click="onRecipeBatchDelete">删除</button>
+          <button class="batch-btn batch-done" @click="recipeBatch.exitBatchMode()">完成</button>
         </div>
       </div>
     </Transition>
 
     <!-- ==================== 食材列表 Tab ==================== -->
-    <div :class="['food-list', { 'batch-active': batchMode }]" v-if="activeTab === 'food' && groupedFoods.length">
+    <div :class="['food-list', { 'batch-active': foodBatch.batchMode.value }]" v-if="activeTab === 'food' && groupedFoods.length">
       <div v-for="group in groupedFoods" :key="group.category" class="food-group">
         <div class="group-header">
           <span class="group-emoji">{{ getCategoryEmoji(group.category) }}</span>
@@ -60,20 +91,20 @@
           <span class="group-count">{{ group.items.length }}</span>
         </div>
         <TransitionGroup name="food-card" tag="div" class="group-items">
-          <div class="food-card-wrapper" v-for="food in group.items" :key="food.id"
-            @touchstart="touchStart($event, food.id)" @touchmove="touchMove($event, food.id)" @touchend="touchEnd($event, food.id)"
-            @mousedown="mouseStart($event, food.id)" @mouseup="mouseEnd($event, food.id)" @mouseleave="mouseLeave(food.id)"
+          <div class="swipe-wrapper food-card-wrapper" v-for="food in group.items" :key="food.id"
+            @touchstart="foodBatch.touchStart($event, food)" @touchmove="foodBatch.touchMove($event, food, '.swipe-card')" @touchend="foodBatch.touchEnd($event, food, '.swipe-card')"
+            @mousedown="foodBatch.mouseStart($event, food)" @mouseup="foodBatch.mouseEnd($event, food)" @mouseleave="foodBatch.mouseLeave(food)"
             @contextmenu.prevent>
-            <div class="food-card-actions">
-              <button class="food-action-btn food-action-delete" @click.stop="confirmDelete(food)" title="删除">
+            <div class="swipe-actions food-card-actions">
+              <button class="swipe-action-btn food-action-delete" @click.stop="confirmDelete(food)" title="删除">
                 <span class="action-emoji">🗑️</span><span class="action-label">删除</span>
               </button>
             </div>
-            <div :class="['food-card', { 'swipe-open': swipedId === food.id, selected: selectedIds.has(food.id) }]"
-              @click="handleCardClick(food)" :style="cardStyle(food.id)">
-              <div v-if="batchMode" class="food-checkbox" @click.stop>
-                <div :class="['checkbox-icon', { checked: selectedIds.has(food.id) }]">
-                  <span v-if="selectedIds.has(food.id)">✓</span>
+            <div :class="['swipe-card food-card', { selected: foodBatch.selectedIds.value.has(food.id) }]"
+              @click="foodBatch.handleCardClick(food)" :style="foodBatch.cardStyle(food.id)">
+              <div v-if="foodBatch.batchMode.value" class="food-checkbox" @click.stop>
+                <div :class="['select-checkbox', 'checkbox-icon', { checked: foodBatch.selectedIds.value.has(food.id) }]">
+                  <span v-if="foodBatch.selectedIds.value.has(food.id)">✓</span>
                 </div>
               </div>
               <div class="food-info">
@@ -91,7 +122,10 @@
     </div>
 
     <div class="empty-state" v-if="activeTab === 'food' && !groupedFoods.length">
-      <div class="empty-icon">🛒</div><div class="empty-text">冰箱空空如也~</div><div class="empty-hint">点下方 + 添加第一种食材吧</div>
+      <div class="empty-icon">🛒</div>
+      <div class="empty-text">冰箱空空如也~</div>
+      <div class="empty-hint">点下方 + 添加第一种食材吧</div>
+      <button class="empty-cta" @click="openAddModal">+ 添加食材</button>
     </div>
 
     <!-- ==================== 购物清单 Tab (P2-1) ==================== -->
@@ -100,25 +134,61 @@
         <input v-model="shopInput" class="shop-input" placeholder="添加要买的东西…" maxlength="30" @keyup.enter="addShopItem" />
         <button class="shop-add-btn" @click="addShopItem" :disabled="!shopInput.trim()">添加</button>
       </div>
+
+      <div class="storage-filter-row" v-if="sortedShopList.length > 0">
+        <div class="storage-filter-scroll"></div>
+        <button :class="['batch-toggle-btn', { active: shopBatch.batchMode.value }]" @click="shopBatch.toggleBatchMode()">
+          {{ shopBatch.batchMode.value ? '完成' : '多选' }}
+        </button>
+      </div>
+
       <div class="shop-section" v-if="uncheckedShopItems.length">
         <div class="shop-section-title">待购买 ({{ uncheckedShopItems.length }})</div>
-        <div v-for="item in uncheckedShopItems" :key="item.id" class="shop-item" @click="foodStore.toggleShopItem(item.id)">
-          <div :class="['shop-check', { checked: item.checked }]"><span v-if="item.checked">✓</span></div>
-          <span class="shop-item-text">{{ item.text }}</span>
-          <button class="shop-item-del" @click.stop="foodStore.removeShopItem(item.id)">✕</button>
+        <div class="shop-item-wrapper" v-for="item in uncheckedShopItems" :key="item.id"
+          @touchstart="shopBatch.touchStart($event, item)" @touchmove="shopBatch.touchMove($event, item, '.shop-item-card')" @touchend="shopBatch.touchEnd($event, item, '.shop-item-card')"
+          @mousedown="shopBatch.mouseStart($event, item)" @mouseup="shopBatch.mouseEnd($event, item)" @mouseleave="shopBatch.mouseLeave(item)"
+          @contextmenu.prevent>
+          <div class="swipe-actions">
+            <button class="swipe-action-btn" @click.stop="shopBatch.deleteSingle(item.id)">
+              <span class="action-emoji">🗑️</span><span class="action-label">删除</span>
+            </button>
+          </div>
+          <div :class="['shop-item-card', { checked: item.checked, selected: shopBatch.selectedIds.value.has(item.id) }]"
+            @click="onShopItemClick(item)" :style="shopBatch.cardStyle(item.id)">
+            <div v-if="shopBatch.batchMode.value" class="select-checkbox" :class="{ checked: shopBatch.selectedIds.value.has(item.id) }">
+              <span v-if="shopBatch.selectedIds.value.has(item.id)">✓</span>
+            </div>
+            <div v-else :class="['shop-check', { checked: item.checked }]" @click.stop="foodStore.toggleShopItem(item.id)"><span v-if="item.checked">✓</span></div>
+            <span class="shop-item-text">{{ item.text }}<span v-if="item.source" class="shop-source-tag">🏷️ {{ item.source }}</span></span>
+          </div>
         </div>
       </div>
       <div class="shop-section" v-if="checkedShopItems.length">
         <div class="shop-section-title dim">已购买 ({{ checkedShopItems.length }})</div>
-        <div v-for="item in checkedShopItems" :key="item.id" class="shop-item checked" @click="foodStore.toggleShopItem(item.id)">
-          <div :class="['shop-check', { checked: item.checked }]"><span v-if="item.checked">✓</span></div>
-          <span class="shop-item-text">{{ item.text }}</span>
-          <button class="shop-item-del" @click.stop="foodStore.removeShopItem(item.id)">✕</button>
+        <div class="shop-item-wrapper" v-for="item in checkedShopItems" :key="item.id"
+          @touchstart="shopBatch.touchStart($event, item)" @touchmove="shopBatch.touchMove($event, item, '.shop-item-card')" @touchend="shopBatch.touchEnd($event, item, '.shop-item-card')"
+          @mousedown="shopBatch.mouseStart($event, item)" @mouseup="shopBatch.mouseEnd($event, item)" @mouseleave="shopBatch.mouseLeave(item)"
+          @contextmenu.prevent>
+          <div class="swipe-actions">
+            <button class="swipe-action-btn" @click.stop="shopBatch.deleteSingle(item.id)">
+              <span class="action-emoji">🗑️</span><span class="action-label">删除</span>
+            </button>
+          </div>
+          <div :class="['shop-item-card', { checked: item.checked, selected: shopBatch.selectedIds.value.has(item.id) }]"
+            @click="onShopItemClick(item)" :style="shopBatch.cardStyle(item.id)">
+            <div v-if="shopBatch.batchMode.value" class="select-checkbox" :class="{ checked: shopBatch.selectedIds.value.has(item.id) }">
+              <span v-if="shopBatch.selectedIds.value.has(item.id)">✓</span>
+            </div>
+            <div v-else :class="['shop-check', { checked: item.checked }]" @click.stop="foodStore.toggleShopItem(item.id)"><span v-if="item.checked">✓</span></div>
+            <span class="shop-item-text">{{ item.text }}<span v-if="item.source" class="shop-source-tag">🏷️ {{ item.source }}</span></span>
+          </div>
         </div>
         <button class="shop-clear-btn" @click="foodStore.clearCheckedShopItems()">清除已完成</button>
       </div>
       <div class="empty-state" v-if="sortedShopList.length === 0">
-        <div class="empty-icon">📝</div><div class="empty-text">购物清单是空的~</div><div class="empty-hint">在上面输入要买的东西吧</div>
+        <div class="empty-icon">📝</div>
+        <div class="empty-text">购物清单是空的~</div>
+        <div class="empty-hint">在上面输入要买的东西，或从菜谱"加入购物清单"</div>
       </div>
     </div>
 
@@ -129,63 +199,86 @@
           🧑‍🍳 基于冰箱里的 <strong>{{ foodStore.totalCount }}</strong> 件食材自动同步，猜你喜欢：
         </div>
         <div class="recipe-hint" v-else>🧑‍🍳 冰箱还是空的，先添加食材才能匹配菜谱哦～</div>
-        <button class="btn-add-recipe" @click="openRecipeModal">+ 自定义菜谱</button>
+        <button v-if="recommendedRecipes.length > 0" :class="['batch-toggle-btn', { active: recipeBatch.batchMode.value }]" @click="recipeBatch.toggleBatchMode()">
+          {{ recipeBatch.batchMode.value ? '完成' : '多选' }}
+        </button>
       </div>
 
-      <div class="recipe-empty" v-if="recommendedRecipes.length === 0 && foodStore.totalCount > 0">
+      <!-- 菜谱分类筛选 -->
+      <div class="recipe-category-bar" v-if="recommendedRecipes.length > 0">
+        <button v-for="cat in recipeCategoryOptions" :key="cat.key"
+          :class="['recipe-category-chip', { active: activeRecipeCategory === cat.key }]"
+          @click="activeRecipeCategory = cat.key">{{ cat.label }}</button>
+      </div>
+
+      <div class="recipe-empty" v-if="filteredRecipes.length === 0 && foodStore.totalCount > 0">
         <div class="empty-icon">🍳</div>
-        <div class="empty-text">现有食材还没法匹配菜谱</div>
-        <div class="empty-hint">添加更多常用食材，或点击右上角自定义菜谱</div>
+        <div class="empty-text">{{ recommendedRecipes.length === 0 ? '现有食材还没法匹配菜谱' : '该分类下暂无菜谱' }}</div>
+        <div class="empty-hint">添加更多常用食材，或点击下方 + 自定义菜谱</div>
       </div>
 
-      <div class="recipe-card" v-for="r in recommendedRecipes" :key="r.id" @click="toggleRecipeDetail(r.id)">
-        <div class="recipe-header">
-          <span class="recipe-emoji">{{ r.emoji }}</span>
-          <div class="recipe-info">
-            <div class="recipe-name">{{ r.name }}</div>
-            <div class="recipe-meta">{{ r.difficulty }} · ⏱ {{ r.time }}分钟 · 🔥 {{ r.calories }} kcal</div>
-            <div class="recipe-goal-tags" v-if="r.goalTags.length">
-              <span v-for="tag in r.goalTags" :key="tag" class="goal-tag">{{ tag }}</span>
-            </div>
-          </div>
-          <div :class="['recipe-match-badge', r.ratio >= 1 ? 'match-full' : r.ratio > 0 ? 'match-high' : 'match-none']">
-            {{ r.ratio >= 1 ? '✅ 全部齐备' : r.ratio > 0 ? `缺${r.unmatched.length}种` : '未匹配' }}
-          </div>
+      <div class="recipe-item-wrapper" v-for="r in filteredRecipes" :key="r.id"
+        @touchstart="recipeBatch.touchStart($event, r)" @touchmove="recipeBatch.touchMove($event, r, '.recipe-item-card')" @touchend="recipeBatch.touchEnd($event, r, '.recipe-item-card')"
+        @mousedown="recipeBatch.mouseStart($event, r)" @mouseup="recipeBatch.mouseEnd($event, r)" @mouseleave="recipeBatch.mouseLeave(r)"
+        @contextmenu.prevent>
+        <div class="swipe-actions">
+          <button v-if="!r.id.startsWith('r')" class="swipe-action-btn" @click.stop="recipeBatch.deleteSingle(r.id)">
+            <span class="action-emoji">🗑️</span><span class="action-label">删除</span>
+          </button>
+          <button v-else class="swipe-action-btn" disabled style="opacity:0.5;cursor:not-allowed">
+            <span class="action-emoji">🔒</span><span class="action-label">内置</span>
+          </button>
         </div>
-        <div class="recipe-ingredients-preview">
-          <span v-for="ing in r.ingredients" :key="ing"
-            :class="['ingredient-tag', r.matched.includes(ing) ? 'ingredient-have' : 'ingredient-miss']">
-            {{ r.matched.includes(ing) ? '✅' : '❌' }} {{ ing }}
-          </span>
-        </div>
-        <Transition name="expand">
-          <div v-if="expandedRecipe === r.id" class="recipe-body">
-            <div class="recipe-section">
-              <div class="recipe-section-title">所需食材</div>
-              <div class="recipe-ingredients">
-                <span v-for="ing in r.ingredients" :key="ing"
-                  :class="['ingredient-tag', r.matched.includes(ing) ? 'ingredient-have' : 'ingredient-miss']">
-                  {{ r.matched.includes(ing) ? '✅' : '❌' }} {{ ing }}
-                </span>
+        <div :class="['recipe-item-card', { selected: recipeBatch.selectedIds.value.has(r.id) }]"
+          @click="recipeBatch.handleCardClick(r)" :style="recipeBatch.cardStyle(r.id)">
+          <div v-if="recipeBatch.batchMode.value" class="select-checkbox" :class="{ checked: recipeBatch.selectedIds.value.has(r.id), disabled: r.id.startsWith('r') }" @click.stop>
+            <span v-if="recipeBatch.selectedIds.value.has(r.id)">✓</span>
+          </div>
+          <div class="recipe-header">
+            <span class="recipe-emoji">{{ r.emoji }}</span>
+            <div class="recipe-info">
+              <div class="recipe-name">{{ r.name }}</div>
+              <div class="recipe-meta">{{ r.difficulty }} · ⏱ {{ r.time }}分钟 · 🔥 {{ r.calories }} kcal</div>
+              <div class="recipe-goal-tags" v-if="r.goalTags.length">
+                <span v-for="tag in r.goalTags" :key="tag" class="goal-tag">{{ tag }}</span>
               </div>
             </div>
-            <div class="recipe-section">
-              <div class="recipe-section-title">做法步骤</div>
-              <div class="recipe-step" v-for="(step, i) in r.steps" :key="i">
-                <span class="step-num">{{ i + 1 }}</span>
-                <span class="step-text">{{ step }}</span>
-              </div>
-            </div>
-            <div class="recipe-actions">
-              <button class="btn-recipe-shop" @click.stop="addMissingToShopList(r)">
-                📝 缺的食材加入购物清单
-              </button>
-              <button v-if="!r.id.startsWith('r')" class="btn-recipe-delete" @click.stop="removeRecipe(r.id)">
-                🗑️ 删除
-              </button>
+            <div :class="['recipe-match-badge', r.ratio >= 1 ? 'match-full' : r.ratio > 0 ? 'match-high' : 'match-none']">
+              {{ r.ratio >= 1 ? '✅ 全部齐备' : r.ratio > 0 ? `缺${r.unmatched.length}种` : '未匹配' }}
             </div>
           </div>
-        </Transition>
+          <div class="recipe-ingredients-preview">
+            <span v-for="ing in r.ingredients" :key="ing"
+              :class="['ingredient-tag', r.matched.includes(ing) ? 'ingredient-have' : 'ingredient-miss']">
+              {{ r.matched.includes(ing) ? '✅' : '❌' }} {{ ing }}
+            </span>
+          </div>
+          <Transition name="expand">
+            <div v-if="expandedRecipe === r.id" class="recipe-body">
+              <div class="recipe-section">
+                <div class="recipe-section-title">所需食材</div>
+                <div class="recipe-ingredients">
+                  <span v-for="ing in r.ingredients" :key="ing"
+                    :class="['ingredient-tag', r.matched.includes(ing) ? 'ingredient-have' : 'ingredient-miss']">
+                    {{ r.matched.includes(ing) ? '✅' : '❌' }} {{ ing }}
+                  </span>
+                </div>
+              </div>
+              <div class="recipe-section">
+                <div class="recipe-section-title">做法步骤</div>
+                <div class="recipe-step" v-for="(step, i) in r.steps" :key="i">
+                  <span class="step-num">{{ i + 1 }}</span>
+                  <span class="step-text">{{ step }}</span>
+                </div>
+              </div>
+              <div class="recipe-actions">
+                <button class="btn-recipe-shop" @click.stop="addMissingToShopList(r)">
+                  📝 缺的食材加入购物清单
+                </button>
+              </div>
+            </div>
+          </Transition>
+        </div>
       </div>
     </div>
 
@@ -261,8 +354,10 @@
       </div>
     </div>
 
-    <!-- FAB -->
-    <button class="fab" v-if="activeTab === 'food'" @click="openAddModal">+</button>
+    <!-- FAB：全 Tab 统一显示（profile 无添加语义，不显示） -->
+    <button v-if="activeTab === 'food'" class="fab" @click="openAddModal">+</button>
+    <button v-else-if="activeTab === 'recipes'" class="fab fab-recipe" @click="openRecipeModal">+</button>
+    <button v-else-if="activeTab === 'shop'" class="fab fab-shop" @click="focusShopInput">+</button>
 
     <!-- TabBar -->
     <nav class="tab-bar">
@@ -451,6 +546,12 @@
               </div>
             </div>
             <div class="form-group">
+              <label class="form-label">分类</label>
+              <div class="difficulty-picker">
+                <button v-for="c in recipeCategoryCreateOptions" :key="c" :class="['difficulty-chip', { active: recipeForm.category === c }]" @click="recipeForm.category = c">{{ c }}</button>
+              </div>
+            </div>
+            <div class="form-group">
               <label class="form-label">所需食材（用逗号分隔）</label>
               <input v-model="recipeForm.ingredientsText" class="form-input" placeholder="鸡蛋, 番茄, 葱" />
             </div>
@@ -467,7 +568,7 @@
       </div>
     </Transition>
 
-    <!-- 删除确认 -->
+    <!-- 删除确认（单条） -->
     <Transition name="modal">
       <div v-if="deleteTarget" class="modal-overlay alert-overlay" @click.self="deleteTarget = null">
         <div class="alert-sheet">
@@ -480,14 +581,14 @@
       </div>
     </Transition>
 
-    <!-- 批量删除确认 -->
+    <!-- 批量删除确认（统一） -->
     <Transition name="modal">
       <div v-if="batchDeleteTarget" class="modal-overlay alert-overlay" @click.self="batchDeleteTarget = ''">
         <div class="alert-sheet">
           <div class="alert-icon">⚠️</div><div class="alert-title">{{ batchDeleteTarget }}</div>
           <div class="alert-desc">此操作不可撤销</div>
           <div class="alert-actions">
-            <button class="btn-cancel" @click="batchDeleteTarget = ''">取消</button><button class="btn-danger" @click="doBatchDelete">删除</button>
+            <button class="btn-cancel" @click="batchDeleteTarget = ''">取消</button><button class="btn-danger" @click="doBatchDeleteConfirm">删除</button>
           </div>
         </div>
       </div>
@@ -498,6 +599,7 @@
 <script setup>
 import { ref, computed, reactive, onMounted, watch } from 'vue'
 import { useFoodStore, validateFoodName, validateQuantity as checkQuantity, validateDays as checkDays, recommendDays, GOAL_OPTIONS } from './store/foodStore.js'
+import { useSwipeBatch } from './composables/useSwipeBatch.js'
 
 const foodStore = useFoodStore()
 
@@ -513,11 +615,31 @@ const storageFilterOptions = [
   { key:'all', label:'全部位置' }, { key:'冷藏', label:'❄️ 冷藏' }, { key:'冷冻', label:'🧊 冷冻' }, { key:'常温', label:'🏠 常温' },
 ]
 const difficultyOptions = ['超简单', '简单', '中等', '困难']
+const sortOptions = [
+  { key: 'expiry', label: '临期优先' },
+  { key: 'created', label: '添加时间' },
+  { key: 'name', label: '名称' },
+]
+const recipeCategoryOptions = [
+  { key: 'all', label: '全部' },
+  { key: '蔬菜', label: '🥬 蔬菜' },
+  { key: '肉类', label: '🥩 肉类' },
+  { key: '水果', label: '🍎 水果' },
+  { key: '乳制品', label: '🥛 乳制品' },
+  { key: '其他', label: '📦 其他' },
+]
+const recipeCategoryCreateOptions = ['蔬菜', '肉类', '水果', '乳制品', '其他']
 const todayStr = new Date().toISOString().slice(0, 10)
 
 // ========== Tab ==========
 const activeTab = ref('food')
-function switchTab(tab) { activeTab.value = tab; if (tab === 'food') { exitBatchMode() } }
+function switchTab(tab) {
+  activeTab.value = tab
+  // 切换 tab 时退出所有批量模式，避免状态串台
+  foodBatch.exitBatchMode()
+  shopBatch.exitBatchMode()
+  recipeBatch.exitBatchMode()
+}
 
 // ========== 我的 / NutritionMaster 参考 ==========
 const goalOptions = GOAL_OPTIONS
@@ -531,86 +653,99 @@ function saveUserProfile() {
 // ========== 搜索 & 筛选 ==========
 const searchText = ref(''); const activeCategory = ref('all'); const activeStorage = ref('all')
 
-// ========== 批量（购物车式多选） ==========
-const batchMode = ref(false); const selectedIds = ref(new Set()); const batchDeleteTarget = ref('')
-function toggleBatchMode() { batchMode.value = !batchMode.value; if (!batchMode.value) selectedIds.value = new Set() }
-function exitBatchMode() { batchMode.value = false; selectedIds.value = new Set() }
-function toggleSelectAll() { selectedIds.value = allSelected.value ? new Set() : new Set(filteredFoods.value.map(f => f.id)) }
-const allSelected = computed(() => filteredFoods.value.length > 0 && selectedIds.value.size === filteredFoods.value.length)
-function handleCardClick(food) {
-  if (swipedId.value && swipedId.value !== food.id) { swipedId.value = null; return }
-  if (batchMode.value) { const s = new Set(selectedIds.value); if (s.has(food.id)) s.delete(food.id); else s.add(food.id); selectedIds.value = s }
-  else editFood(food)
+// ========== 食材排序（localStorage 持久化） ==========
+const SORT_KEY = 'ffood_sort'
+const sortBy = ref(localStorage.getItem(SORT_KEY) || 'expiry')
+function setSortBy(key) {
+  sortBy.value = key
+  localStorage.setItem(SORT_KEY, key)
 }
-function batchDelete() { if (selectedIds.value.size > 0) batchDeleteTarget.value = `删除 ${selectedIds.value.size} 件食材` }
-function doBatchDelete() { foodStore.removeFoods([...selectedIds.value]); selectedIds.value = new Set(); batchDeleteTarget.value = ''; batchMode.value = false }
 
-// ========== 长按进入多选 ==========
-const longPressTimer = ref(null)
-const LONG_PRESS_MS = 550
-function startLongPress(id) {
-  clearLongPress()
-  longPressTimer.value = setTimeout(() => {
-    if (!batchMode.value) {
-      batchMode.value = true
-      selectedIds.value = new Set([id])
-    }
-    longPressTimer.value = null
-  }, LONG_PRESS_MS)
-}
-function clearLongPress() {
-  if (longPressTimer.value) { clearTimeout(longPressTimer.value); longPressTimer.value = null }
-}
-function touchStart(e, id) {
-  if (batchMode.value) return
-  const t = e.touches[0]
-  touchMap.set(id, { startX: t.clientX, startY: t.clientY, time: Date.now() })
-  startLongPress(id)
-}
-function touchMove(e, id) {
-  if (batchMode.value || !touchMap.has(id)) return
-  const t = e.touches[0]
-  const state = touchMap.get(id)
-  const dx = t.clientX - state.startX
-  const dy = t.clientY - state.startY
-  if (Math.abs(dy) > 10 || Math.abs(dx) > 10) clearLongPress()
-  if (Math.abs(dy) > Math.abs(dx)) return
-  e.preventDefault()
-  const card = e.currentTarget.querySelector('.food-card')
-  if (dx < 0) card.style.transform = `translateX(${Math.max(dx, -90)}px)`
-  else card.style.transform = `translateX(${Math.min(dx, 0)}px)`
-}
-function touchEnd(e, id) {
-  clearLongPress()
-  if (batchMode.value || !touchMap.has(id)) return
-  const t = e.changedTouches[0]
-  const state = touchMap.get(id)
-  const dx = t.clientX - state.startX
-  const card = e.currentTarget.querySelector('.food-card')
-  card.style.transform = ''
-  if (dx < SWIPE_THRESHOLD) { swipedId.value = id } else { swipedId.value = null }
-  touchMap.delete(id)
-}
-function mouseStart(e, id) {
-  if (batchMode.value || e.button !== 0) return
-  startLongPress(id)
-  mouseMap.set(id, { x: e.clientX, y: e.clientY })
-}
-function mouseEnd(e, id) {
-  clearLongPress()
-  mouseMap.delete(id)
-}
-function mouseLeave(id) { clearLongPress(); mouseMap.delete(id) }
+// ========== 批量删除统一确认弹窗 ==========
+const batchDeleteTarget = ref('')
+const pendingBatchAction = ref(null)  // 'food' | 'shop' | 'recipe'
 
-// ========== 列表滑动删除 ==========
-const swipedId = ref(null)
-const touchMap = new Map()
-const mouseMap = new Map()
-const SWIPE_THRESHOLD = -64
+function onFoodBatchDelete() {
+  if (foodBatch.selectedIds.value.size === 0) return
+  pendingBatchAction.value = 'food'
+  batchDeleteTarget.value = `删除 ${foodBatch.selectedIds.value.size} 件食材`
+}
+function onShopBatchDelete() {
+  if (shopBatch.selectedIds.value.size === 0) return
+  pendingBatchAction.value = 'shop'
+  batchDeleteTarget.value = `删除 ${shopBatch.selectedIds.value.size} 项购物清单`
+}
+function onRecipeBatchDelete() {
+  // 过滤掉内置菜谱（不应被选中，但二次保护）
+  const customSelected = [...recipeBatch.selectedIds.value].filter(id => !id.startsWith('r'))
+  if (customSelected.length === 0) {
+    batchDeleteTarget.value = ''
+    return
+  }
+  pendingBatchAction.value = 'recipe'
+  batchDeleteTarget.value = `删除 ${customSelected.length} 个自定义菜谱`
+}
+function doBatchDeleteConfirm() {
+  const ids = pendingBatchAction.value === 'food'
+    ? foodBatch.selectedIds.value
+    : pendingBatchAction.value === 'shop'
+      ? shopBatch.selectedIds.value
+      : [...recipeBatch.selectedIds.value].filter(id => !id.startsWith('r'))
+  if (pendingBatchAction.value === 'food') {
+    foodStore.removeFoods([...ids])
+    foodBatch.exitBatchMode()
+  } else if (pendingBatchAction.value === 'shop') {
+    foodStore.removeShopItems([...ids])
+    shopBatch.exitBatchMode()
+  } else if (pendingBatchAction.value === 'recipe') {
+    foodStore.removeRecipes([...ids])
+    recipeBatch.exitBatchMode()
+  }
+  batchDeleteTarget.value = ''
+  pendingBatchAction.value = null
+}
 
-function cardStyle(id) {
-  const x = swipedId.value === id ? SWIPE_THRESHOLD : 0
-  return { transform: `translateX(${x}px)`, transition: 'transform 0.25s cubic-bezier(0.25, 0.1, 0.25, 1)' }
+// ========== 三处统一滑动 + 多选 ==========
+// 食材
+const foodBatch = useSwipeBatch({
+  getItems: () => filteredFoods.value,
+  onDelete: (id) => {
+    const food = foodStore.foods.find(f => f.id === id)
+    if (food) confirmDelete(food)
+  },
+  onBatchDelete: (ids) => foodStore.removeFoods(ids),
+  onItemClick: (food) => editFood(food),
+})
+
+// 购物清单
+const shopBatch = useSwipeBatch({
+  getItems: () => sortedShopList.value,
+  onDelete: (id) => foodStore.removeShopItem(id),
+  onBatchDelete: (ids) => foodStore.removeShopItems(ids),
+  onItemClick: (item) => {
+    // 非多选模式：点击切换勾选
+    foodStore.toggleShopItem(item.id)
+  },
+})
+
+// 菜谱（内置 r1-r12 不可选/不可删）
+const recipeBatch = useSwipeBatch({
+  getItems: () => filteredRecipes.value,
+  onDelete: (id) => {
+    if (id.startsWith('r')) return
+    foodStore.removeRecipe(id)
+  },
+  onBatchDelete: (ids) => {
+    const custom = ids.filter(id => !id.startsWith('r'))
+    if (custom.length) foodStore.removeRecipes(custom)
+  },
+  canSelect: (r) => !r.id.startsWith('r'),
+  onItemClick: (r) => toggleRecipeDetail(r.id),
+})
+
+// 非多选模式下，购物清单点击交由 onItemClick 处理
+function onShopItemClick(item) {
+  shopBatch.handleCardClick(item)
 }
 
 // ========== 统计 ==========
@@ -663,13 +798,13 @@ function saveFood() {
   closeModal()
 }
 function confirmDelete(food) { deleteTarget.value = food }
-function doDelete() { if (deleteTarget.value) { foodStore.removeFood(deleteTarget.value.id); deleteTarget.value = null } }
+function doDelete() { if (deleteTarget.value) { foodStore.removeFood(deleteTarget.value.id); deleteTarget.value = null; foodBatch.swipedId.value = null } }
 
 // ========== 自定义菜谱 ==========
 const showRecipeModal = ref(false)
-const recipeForm = ref({ name:'', emoji:'🍳', difficulty:'简单', time:15, ingredientsText:'', stepsText:'' })
+const recipeForm = ref({ name:'', emoji:'🍳', difficulty:'简单', time:15, category:'蔬菜', ingredientsText:'', stepsText:'' })
 const isRecipeFormValid = computed(() => recipeForm.value.name.trim() && recipeForm.value.ingredientsText.trim())
-function openRecipeModal() { recipeForm.value = { name:'', emoji:'🍳', difficulty:'简单', time:15, ingredientsText:'', stepsText:'' }; showRecipeModal.value = true }
+function openRecipeModal() { recipeForm.value = { name:'', emoji:'🍳', difficulty:'简单', time:15, category:'蔬菜', ingredientsText:'', stepsText:'' }; showRecipeModal.value = true }
 function closeRecipeModal() { showRecipeModal.value = false }
 function saveRecipe() {
   if (!isRecipeFormValid.value) return
@@ -678,20 +813,29 @@ function saveRecipe() {
     emoji: recipeForm.value.emoji,
     difficulty: recipeForm.value.difficulty,
     time: recipeForm.value.time,
+    category: recipeForm.value.category,
     ingredients: recipeForm.value.ingredientsText.split(/[,，]/).map(s => s.trim()).filter(Boolean),
     steps: recipeForm.value.stepsText.split(/\n/).map(s => s.trim()).filter(Boolean),
   })
   closeRecipeModal()
 }
-function removeRecipe(id) { foodStore.removeRecipe(id) }
 
-// ========== 列表 ==========
+// ========== 列表（带排序） ==========
 const filteredFoods = computed(() => {
   let list = foodStore.foods
   if (activeCategory.value !== 'all') list = list.filter(f => f.category === activeCategory.value)
   if (activeStorage.value !== 'all') list = list.filter(f => f.storage === activeStorage.value)
   if (searchText.value.trim()) { const kw = searchText.value.trim().toLowerCase(); list = list.filter(f => f.name.toLowerCase().includes(kw)) }
-  return list
+  // 排序
+  const sorted = [...list]
+  if (sortBy.value === 'expiry') {
+    sorted.sort((a, b) => (a.daysLeft ?? Infinity) - (b.daysLeft ?? Infinity))
+  } else if (sortBy.value === 'created') {
+    sorted.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0))
+  } else if (sortBy.value === 'name') {
+    sorted.sort((a, b) => a.name.localeCompare(b.name, 'zh'))
+  }
+  return sorted
 })
 const groupedFoods = computed(() => {
   const groups = {}
@@ -701,15 +845,30 @@ const groupedFoods = computed(() => {
 
 // ========== 购物清单 ==========
 const shopInput = ref('')
+const shopInputRef = ref(null)
 const sortedShopList = computed(() => foodStore.getShopListSorted())
 const uncheckedShopItems = computed(() => sortedShopList.value.filter(i => !i.checked))
 const checkedShopItems = computed(() => sortedShopList.value.filter(i => i.checked))
 const shopUncheckedCount = computed(() => uncheckedShopItems.value.length)
-function addShopItem() { foodStore.addShopItem(shopInput.value); shopInput.value = '' }
+function addShopItem() {
+  if (!shopInput.value.trim()) return
+  foodStore.addShopItem(shopInput.value)
+  shopInput.value = ''
+}
+function focusShopInput() {
+  // FAB 在购物清单 tab：聚焦输入框（输入框在最顶部，无需弹窗）
+  const el = document.querySelector('.shop-input')
+  if (el) { el.focus(); el.scrollIntoView({ behavior: 'smooth', block: 'start' }) }
+}
 
 // ========== 菜谱 (P2-2) ==========
 const expandedRecipe = ref(null)
+const activeRecipeCategory = ref('all')
 const recommendedRecipes = computed(() => foodStore.getRecommendedRecipes())
+const filteredRecipes = computed(() => {
+  if (activeRecipeCategory.value === 'all') return recommendedRecipes.value
+  return recommendedRecipes.value.filter(r => r.category === activeRecipeCategory.value)
+})
 function toggleRecipeDetail(id) { expandedRecipe.value = expandedRecipe.value === id ? null : id }
 function pickRandomRecipe() {
   const recipes = recommendedRecipes.value.length ? recommendedRecipes.value : foodStore.recipes
@@ -722,7 +881,10 @@ watch(recommendedRecipes, () => {
   }
 })
 function addMissingToShopList(recipe) {
-  for (const ing of recipe.unmatched) { foodStore.addShopItem(ing) }
+  // 带来源标记：从菜谱加入的购物项标注菜谱名
+  for (const ing of recipe.unmatched) {
+    foodStore.addShopItemWithSource(ing, recipe.name)
+  }
 }
 
 // ========== 扫码 (P2-3) ==========

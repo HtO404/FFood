@@ -2124,3 +2124,276 @@ select.form-input {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ============================================================
+   统一交互层（P0：食材 / 菜谱 / 购物清单 共用滑动+多选）
+   ============================================================ */
+
+/* 通用卡片 wrapper（左滑容器） */
+.swipe-wrapper {
+  position: relative;
+  margin-bottom: 8px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  user-select: none;
+  touch-action: pan-y;
+}
+
+/* 通用左滑删除背景层 */
+.swipe-actions {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 80px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: stretch;
+  background: var(--red);
+  z-index: 1;
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+}
+
+.swipe-action-btn {
+  width: 80px;
+  border: none;
+  background: transparent;
+  color: var(--text-inverse);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.swipe-action-btn .action-emoji { font-size: 24px; line-height: 1; }
+.swipe-action-btn .action-label { font-size: 11px; font-weight: 500; }
+.swipe-action-btn:active { background: rgba(0, 0, 0, 0.12); }
+
+/* 通用滑动卡片层 */
+.swipe-card {
+  position: relative;
+  z-index: 2;
+  will-change: transform;
+  background: #ffffff;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.swipe-card.selected {
+  background: rgba(52, 199, 89, 0.08);
+  box-shadow: inset 0 0 0 1.5px var(--green);
+}
+
+/* 通用复选框（多选模式） */
+.select-checkbox {
+  width: 24px;
+  height: 24px;
+  border-radius: 12px;
+  border: 2px solid rgba(142, 142, 147, 0.35);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  color: var(--text-inverse);
+  background: transparent;
+  transition: all 0.18s;
+}
+.select-checkbox.checked {
+  background: var(--green);
+  border-color: var(--green);
+}
+.select-checkbox.disabled {
+  opacity: 0.3;
+  background: rgba(142, 142, 147, 0.15);
+  border-color: rgba(142, 142, 147, 0.3);
+}
+
+/* ===== 食材排序栏 ===== */
+.sort-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px var(--spacing-md) 8px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.sort-bar::-webkit-scrollbar { display: none; }
+
+.sort-label {
+  font-size: var(--font-caption);
+  color: var(--text-tertiary);
+  flex-shrink: 0;
+  margin-right: 4px;
+}
+
+.sort-chip {
+  flex-shrink: 0;
+  padding: 5px 12px;
+  border: none;
+  border-radius: 14px;
+  background: rgba(120, 120, 128, 0.08);
+  color: var(--text-secondary);
+  font-size: var(--font-footnote);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.sort-chip.active {
+  background: var(--blue);
+  color: var(--text-inverse);
+}
+
+/* ===== 购物清单 wrapper（左滑容器，覆盖原 .shop-item） ===== */
+.shop-item-wrapper {
+  position: relative;
+  margin-bottom: 4px;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  user-select: none;
+  touch-action: pan-y;
+}
+
+.shop-item-wrapper .swipe-actions {
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  width: 72px;
+}
+.shop-item-wrapper .swipe-action-btn { width: 72px; }
+
+.shop-item-card {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-card);
+  cursor: pointer;
+  overflow: hidden;
+  will-change: transform;
+  transition: background 0.15s;
+}
+.shop-item-card:active { background: rgba(0, 122, 255, 0.06); }
+.shop-item-card.checked {
+  background: var(--bg-secondary);
+  opacity: 0.65;
+}
+.shop-item-card.checked .shop-item-text {
+  text-decoration: line-through;
+  color: var(--text-tertiary);
+}
+.shop-item-card.selected {
+  background: rgba(52, 199, 89, 0.08);
+  box-shadow: inset 0 0 0 1.5px var(--green);
+}
+
+.shop-item-text { flex: 1; font-size: var(--font-callout); color: var(--text-primary); }
+
+.shop-source-tag {
+  display: inline-block;
+  font-size: 10px;
+  color: var(--purple);
+  background: rgba(175, 82, 222, 0.1);
+  padding: 1px 6px;
+  border-radius: 8px;
+  margin-left: 6px;
+  white-space: nowrap;
+}
+
+/* ===== 菜谱 wrapper ===== */
+.recipe-item-wrapper {
+  position: relative;
+  margin-bottom: 10px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  user-select: none;
+  touch-action: pan-y;
+}
+
+.recipe-item-card {
+  position: relative;
+  z-index: 2;
+  background: var(--bg-card);
+  backdrop-filter: var(--blur-card);
+  -webkit-backdrop-filter: var(--blur-card);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  overflow: hidden;
+  will-change: transform;
+  transition: transform 0.2s;
+}
+.recipe-item-card:active { transform: scale(0.985); }
+.recipe-item-card.selected {
+  background: rgba(52, 199, 89, 0.08);
+  box-shadow: inset 0 0 0 1.5px var(--green);
+}
+
+/* 菜谱分类筛选 */
+.recipe-category-bar {
+  display: flex;
+  gap: 6px;
+  padding: 0 var(--spacing-md) 10px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.recipe-category-bar::-webkit-scrollbar { display: none; }
+.recipe-category-chip {
+  flex-shrink: 0;
+  padding: 6px 14px;
+  border: none;
+  border-radius: 16px;
+  background: rgba(120, 120, 128, 0.08);
+  color: var(--text-secondary);
+  font-size: var(--font-footnote);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.recipe-category-chip.active {
+  background: var(--orange);
+  color: var(--text-inverse);
+}
+
+/* FAB 在不同 Tab 的微调 */
+.fab.fab-recipe { background: var(--orange); }
+.fab.fab-shop { background: var(--blue); }
+
+/* 统一批量工具栏（覆盖不同 Tab） */
+.batch-toolbar-fixed {
+  position: fixed;
+  left: var(--spacing-md);
+  right: var(--spacing-md);
+  bottom: var(--batch-toolbar-bottom);
+  z-index: var(--z-batch-toolbar);
+  background: rgba(28, 28, 30, 0.92);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  box-shadow: var(--shadow-lg);
+}
+
+/* 空状态 CTA 按钮 */
+.empty-cta {
+  display: inline-block;
+  margin-top: 14px;
+  padding: 10px 22px;
+  border: none;
+  border-radius: 20px;
+  background: var(--blue);
+  color: var(--text-inverse);
+  font-size: var(--font-callout);
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+.empty-cta:active { transform: scale(0.96); }
+

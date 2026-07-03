@@ -325,6 +325,27 @@ class FoodStore {
     this.saveShopList()
   }
 
+  /** 批量删除购物清单 */
+  removeShopItems(ids) {
+    const idSet = new Set(ids)
+    this.state.shopList = this.state.shopList.filter(i => !idSet.has(i.id))
+    this.saveShopList()
+  }
+
+  /** 带来源标记地添加购物项（菜谱联动用） */
+  addShopItemWithSource(text, source) {
+    if (!text || !text.trim()) return
+    const item = {
+      id: genId(),
+      text: text.trim(),
+      checked: false,
+      createdAt: Date.now(),
+      source: source || '',
+    }
+    this.state.shopList.push(item)
+    this.saveShopList()
+  }
+
   clearCheckedShopItems() {
     this.state.shopList = this.state.shopList.filter(i => !i.checked)
     this.saveShopList()
@@ -413,6 +434,13 @@ class FoodStore {
 
   removeRecipe(id) {
     this.state.recipes = this.state.recipes.filter(r => r.id !== id)
+    this.saveRecipes()
+  }
+
+  /** 批量删除菜谱（保护内置菜谱 r1-r12） */
+  removeRecipes(ids) {
+    const idSet = new Set(ids)
+    this.state.recipes = this.state.recipes.filter(r => !idSet.has(r.id) || r.id.startsWith('r'))
     this.saveRecipes()
   }
 
