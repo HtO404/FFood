@@ -469,7 +469,7 @@
 
     <!-- 删除确认 -->
     <Transition name="modal">
-      <div v-if="deleteTarget" class="modal-overlay" @click.self="deleteTarget = null">
+      <div v-if="deleteTarget" class="modal-overlay alert-overlay" @click.self="deleteTarget = null">
         <div class="alert-sheet">
           <div class="alert-icon">⚠️</div><div class="alert-title">删除食材</div>
           <div class="alert-desc">确定删除「{{ deleteTarget.name }}」吗？</div>
@@ -482,7 +482,7 @@
 
     <!-- 批量删除确认 -->
     <Transition name="modal">
-      <div v-if="batchDeleteTarget" class="modal-overlay" @click.self="batchDeleteTarget = ''">
+      <div v-if="batchDeleteTarget" class="modal-overlay alert-overlay" @click.self="batchDeleteTarget = ''">
         <div class="alert-sheet">
           <div class="alert-icon">⚠️</div><div class="alert-title">{{ batchDeleteTarget }}</div>
           <div class="alert-desc">此操作不可撤销</div>
