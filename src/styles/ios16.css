@@ -2115,22 +2115,6 @@ select.form-input {
   .form-group { margin-bottom: var(--spacing-sm); }
 }
 
-/* ---- 深色模式 ---- */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg-primary: rgba(28, 28, 30, 0.95);
-    --bg-secondary: rgba(44, 44, 46, 0.72);
-    --bg-card: rgba(44, 44, 46, 0.85);
-    --bg-elevated: rgba(44, 44, 46, 0.92);
-    --text-primary: #f5f5f7;
-    --text-secondary: #aeaeb2;
-    --text-tertiary: #636366;
-    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
-    --shadow-md: 0 4px 14px rgba(0, 0, 0, 0.4);
-    --shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.5);
-  }
-}
-
 /* ---- 减少动画 ---- */
 @media (prefers-reduced-motion: reduce) {
   *,
