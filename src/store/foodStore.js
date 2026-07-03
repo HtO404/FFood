@@ -16,6 +16,26 @@ class FoodStore {
   get totalCount() { return this.state.foods.length }
   get templates() { return this.state.templates }
 
+  /** 消耗统计 */
+  get stats() {
+    let total = this.state.foods.length
+    let expired = 0
+    let expiringSoon = 0  // ≤1天
+    let fresh = 0
+    const byCategory = {}
+    const byStorage = {}
+    for (const f of this.state.foods) {
+      const dl = calcDaysLeft(f.expiryDate)
+      if (dl < 0) expired++
+      else if (dl <= 1) expiringSoon++
+      else fresh++
+      byCategory[f.category] = (byCategory[f.category] || 0) + 1
+      byStorage[f.storage] = (byStorage[f.storage] || 0) + 1
+    }
+    const wasteRate = total > 0 ? Math.round((expired / total) * 100) : 0
+    return { total, expired, expiringSoon, fresh, wasteRate, byCategory, byStorage }
+  }
+
   // ==================== 食材 CRUD ====================
 
   addFood(item) {
@@ -67,6 +87,18 @@ class FoodStore {
   removeFood(id) {
     this.state.foods = this.state.foods.filter(f => f.id !== id)
     this.save()
+  }
+
+  /** 批量删除 */
+  removeFoods(ids) {
+    const idSet = new Set(ids)
+    this.state.foods = this.state.foods.filter(f => !idSet.has(f.id))
+    this.save()
+  }
+
+  /** 标记已消耗（同删除，语义化别名） */
+  markConsumed(ids) {
+    this.removeFoods(ids)
   }
 
   // ==================== 持久化 ====================
