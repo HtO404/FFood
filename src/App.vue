@@ -453,6 +453,29 @@
         <div class="modal-sheet">
           <div class="modal-handle" /><h3 class="modal-title">{{ editingFood ? '编辑食材' : '添加食材' }}</h3>
           <div class="modal-body">
+            <div class="paste-section" v-if="!editingFood">
+              <button class="paste-toggle-btn" @click="showPasteFood = !showPasteFood">
+                📋 粘贴智能填充
+              </button>
+              <Transition name="expand">
+                <div v-if="showPasteFood" class="paste-area">
+                  <textarea v-model="pasteFoodText" class="paste-textarea" rows="2"
+                    placeholder="例：2个西红柿放了3天冷藏，或 半斤猪肉冷冻"></textarea>
+                  <button class="paste-parse-btn" @click="doPasteFood" :disabled="!pasteFoodText.trim()">智能识别</button>
+                  <div v-if="pasteFoodResult && !pasteFoodResult.loading" class="paste-preview">
+                    <div class="paste-preview-title">识别结果（点击应用到表单）</div>
+                    <div class="paste-preview-body" @click="applyPasteFood">
+                      {{ pasteFoodResult.name || '未识别' }}
+                      <span v-if="pasteFoodResult.quantity">× {{ pasteFoodResult.quantity }} {{ pasteFoodResult.unit }}</span>
+                      <span v-if="pasteFoodResult.storage">· {{ pasteFoodResult.storage }}</span>
+                      <span v-if="pasteFoodResult.days">· 保质期 {{ pasteFoodResult.days }} 天</span>
+                      <span v-if="pasteFoodResult.purchaseDate">· {{ pasteFoodResult.purchaseDate }} 购买</span>
+                      <span v-if="pasteFoodResult.category">· {{ pasteFoodResult.category }}</span>
+                    </div>
+                  </div>
+                </div>
+              </Transition>
+            </div>
             <div v-if="!editingFood && foodStore.templates.length" class="templates-section">
               <div class="form-label">从历史快速添加</div>
               <div class="templates-scroll">
@@ -525,6 +548,28 @@
         <div class="modal-sheet">
           <div class="modal-handle" /><h3 class="modal-title">🍳 自定义菜谱</h3>
           <div class="modal-body">
+            <div class="paste-section">
+              <button class="paste-toggle-btn" @click="showPasteRecipe = !showPasteRecipe">
+                📋 粘贴智能填充
+              </button>
+              <Transition name="expand">
+                <div v-if="showPasteRecipe" class="paste-area">
+                  <textarea v-model="pasteRecipeText" class="paste-textarea" rows="3"
+                    placeholder="例：番茄炒蛋 简单 15分钟 番茄鸡蛋葱，步骤：打散鸡蛋，番茄切块炒出汁"></textarea>
+                  <button class="paste-parse-btn" @click="doPasteRecipe" :disabled="!pasteRecipeText.trim()">智能识别</button>
+                  <div v-if="pasteRecipeResult && !pasteRecipeResult.loading" class="paste-preview">
+                    <div class="paste-preview-title">识别结果（点击应用到表单）</div>
+                    <div class="paste-preview-body" @click="applyPasteRecipe">
+                      {{ pasteRecipeResult.name || '未识别' }}
+                      <span v-if="pasteRecipeResult.difficulty">· {{ pasteRecipeResult.difficulty }}</span>
+                      <span v-if="pasteRecipeResult.time">· {{ pasteRecipeResult.time }}分钟</span>
+                      <span v-if="pasteRecipeResult.ingredients.length">· 食材：{{ pasteRecipeResult.ingredients.join('、') }}</span>
+                      <span v-if="pasteRecipeResult.steps.length">· {{ pasteRecipeResult.steps.length }}步</span>
+                    </div>
+                  </div>
+                </div>
+              </Transition>
+            </div>
             <div class="form-group">
               <label class="form-label">菜谱名称 *</label>
               <input v-model="recipeForm.name" class="form-input" placeholder="例：番茄炒蛋" maxlength="20" />
@@ -600,6 +645,7 @@
 import { ref, computed, reactive, onMounted, watch } from 'vue'
 import { useFoodStore, validateFoodName, validateQuantity as checkQuantity, validateDays as checkDays, recommendDays, GOAL_OPTIONS } from './store/foodStore.js'
 import { useSwipeBatch } from './composables/useSwipeBatch.js'
+import { extractFood, extractRecipe } from './nlp/extractor.js'
 
 const foodStore = useFoodStore()
 
@@ -777,6 +823,53 @@ function validateDayField() { const r = checkDays(form.value.days); errors.days 
 function validateAll() { return validateName() & validateQty() & validateDayField() }
 const isFormValid = computed(() => form.value.name.trim() !== '' && errors.name === '' && errors.quantity === '' && errors.days === '')
 function fillTemplate(tpl) { form.value.name = tpl.name; form.value.quantity = tpl.quantity; form.value.unit = tpl.unit; form.value.category = tpl.category; form.value.storage = tpl.storage; errors.name = ''; errors.quantity = ''; errors.days = '' }
+
+// ========== 粘贴智能填充（NLP） ==========
+const showPasteFood = ref(false)
+const pasteFoodText = ref('')
+const pasteFoodResult = ref(null)
+const showPasteRecipe = ref(false)
+const pasteRecipeText = ref('')
+const pasteRecipeResult = ref(null)
+
+function doPasteFood() {
+  if (!pasteFoodText.value.trim()) return
+  pasteFoodResult.value = { loading: true }
+  extractFood(pasteFoodText.value).then(r => { pasteFoodResult.value = r })
+}
+function applyPasteFood() {
+  const r = pasteFoodResult.value
+  if (!r) return
+  if (r.name) form.value.name = r.name
+  if (r.quantity) form.value.quantity = r.quantity
+  if (r.unit) form.value.unit = r.unit
+  if (r.storage) form.value.storage = r.storage
+  if (r.category) form.value.category = r.category
+  if (r.days) form.value.days = r.days
+  if (r.purchaseDate) form.value.purchaseDate = r.purchaseDate
+  validateName(); validateQty(); validateDayField()
+  showPasteFood.value = false
+  pasteFoodText.value = ''
+  pasteFoodResult.value = null
+}
+function doPasteRecipe() {
+  if (!pasteRecipeText.value.trim()) return
+  pasteRecipeResult.value = { loading: true }
+  extractRecipe(pasteRecipeText.value).then(r => { pasteRecipeResult.value = r })
+}
+function applyPasteRecipe() {
+  const r = pasteRecipeResult.value
+  if (!r) return
+  if (r.name) recipeForm.value.name = r.name
+  if (r.difficulty) recipeForm.value.difficulty = r.difficulty
+  if (r.time) recipeForm.value.time = r.time
+  if (r.category) recipeForm.value.category = r.category
+  if (r.ingredients.length) recipeForm.value.ingredientsText = r.ingredients.join('，')
+  if (r.steps.length) recipeForm.value.stepsText = r.steps.join('\n')
+  showPasteRecipe.value = false
+  pasteRecipeText.value = ''
+  pasteRecipeResult.value = null
+}
 
 function openAddModal() {
   editingFood.value = null

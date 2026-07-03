@@ -1,0 +1,83 @@
+{
+  "version": "1.0",
+  "description": "FFood 中文分词实体抽取测试用例集",
+  "food_cases": [
+    {
+      "id": 1,
+      "input": "2个西红柿",
+      "expect": { "name": "番茄", "quantity": 2, "unit": "个", "category": "蔬菜" }
+    },
+    {
+      "id": 2,
+      "input": "半斤猪肉冷冻保存",
+      "expect": { "name": "猪肉", "quantity": 0.3, "unit": "kg", "storage": "冷冻", "category": "肉类" }
+    },
+    {
+      "id": 3,
+      "input": "500g鸡胸肉冷藏",
+      "expect": { "name": "鸡胸肉", "quantity": 0.5, "unit": "kg", "storage": "冷藏", "category": "肉类" }
+    },
+    {
+      "id": 4,
+      "input": "3个苹果放了4天常温",
+      "expect": { "name": "苹果", "quantity": 3, "unit": "个", "storage": "常温", "category": "水果" }
+    },
+    {
+      "id": 5,
+      "input": "番茄能放10天",
+      "expect": { "name": "番茄", "days": 10, "category": "蔬菜" }
+    },
+    {
+      "id": 6,
+      "input": "鸡蛋10个放冷藏",
+      "expect": { "name": "鸡蛋", "quantity": 10, "unit": "个", "storage": "冷藏", "category": "乳制品" }
+    },
+    {
+      "id": 7,
+      "input": "2斤土豆",
+      "expect": { "name": "土豆", "quantity": 1, "unit": "kg", "category": "蔬菜" }
+    },
+    {
+      "id": 8,
+      "input": "西兰花1个冷藏3天前买的",
+      "expect": { "name": "西兰花", "quantity": 1, "unit": "个", "storage": "冷藏", "category": "蔬菜" }
+    },
+    {
+      "id": 9,
+      "input": "红烧排骨用的排骨500克",
+      "expect": { "name": "排骨", "quantity": 0.5, "unit": "kg", "category": "肉类" }
+    },
+    {
+      "id": 10,
+      "input": "3份米饭",
+      "expect": { "name": "米饭", "quantity": 3, "unit": "份", "category": "主食" }
+    }
+  ],
+  "recipe_cases": [
+    {
+      "id": 11,
+      "input": "番茄炒蛋 简单 15分钟 番茄鸡蛋葱",
+      "expect": { "name": "番茄炒蛋", "difficulty": "简单", "time": 15, "ingredients_includes": ["番茄", "鸡蛋"] }
+    },
+    {
+      "id": 12,
+      "input": "红烧排骨 中等难度1小时 排骨姜酱油",
+      "expect": { "name": "红烧排骨", "difficulty": "中等", "time": 60, "ingredients_includes": ["排骨"] }
+    },
+    {
+      "id": 13,
+      "input": "凉拌黄瓜 超简单5分钟 黄瓜蒜醋",
+      "expect": { "name": "凉拌黄瓜", "difficulty": "超简单", "time": 5, "ingredients_includes": ["黄瓜"] }
+    },
+    {
+      "id": 14,
+      "input": "青椒肉丝 食材：青椒猪肉蒜 步骤：肉丝腌制，青椒切丝，爆炒",
+      "expect": { "name": "青椒肉丝", "ingredients_includes": ["青椒", "猪肉"], "steps_min_count": 1 }
+    },
+    {
+      "id": 15,
+      "input": "清炒时蔬 10分钟 简单 蒜",
+      "expect": { "name": "清炒时蔬", "difficulty": "简单", "time": 10, "ingredients_includes": ["蒜"] }
+    }
+  ]
+}
