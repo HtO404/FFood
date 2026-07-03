@@ -4,6 +4,7 @@ const STORAGE_KEY = 'ffood_data'
 const TEMPLATES_KEY = 'ffood_templates'
 const SHOPLIST_KEY = 'ffood_shoplist'
 const RECIPES_KEY = 'ffood_recipes'
+const USER_KEY = 'ffood_user'
 const MAX_TEMPLATES = 20
 
 // ═════════ P2-2 菜谱 ═════════
@@ -34,6 +35,83 @@ const BARCODE_DB = {
   '6906666777888':{name:'西兰花 约300g',category:'蔬菜',defaultDays:5,defaultStorage:'冷藏'},
 }
 
+// 按食材类型 + 储藏方式推荐保质期（天）
+export const SHELF_LIFE_RECOMMENDATIONS = {
+  '蔬菜': { '冷藏': 7, '冷冻': 90, '常温': 3 },
+  '水果': { '冷藏': 14, '冷冻': 60, '常温': 7 },
+  '肉类': { '冷藏': 3, '冷冻': 180, '常温': 1 },
+  '乳制品': { '冷藏': 21, '冷冻': 90, '常温': 30 },
+  '调料': { '冷藏': 180, '冷冻': 365, '常温': 365 },
+  '其他': { '冷藏': 14, '冷冻': 90, '常温': 7 },
+}
+
+export function recommendDays(category, storage) {
+  const catMap = SHELF_LIFE_RECOMMENDATIONS[category] || SHELF_LIFE_RECOMMENDATIONS['其他']
+  return catMap[storage] || catMap['冷藏'] || 7
+}
+
+// 默认用户资料与健康目标
+export const GOAL_OPTIONS = ['均衡饮食', '减脂', '增肌', '养生']
+export const DEFAULT_USER = { nickname: '', height: 0, weight: 0, age: 0, goal: '均衡饮食' }
+
+// 常见食材每 100g 约计热量（kcal），用于估算
+export const CALORIE_TABLE = {
+  '鸡蛋': 155, '番茄': 18, '西红柿': 18, '葱': 33, '猪肉': 242, '青椒': 22, '蒜': 149,
+  '黄瓜': 16, '醋': 31, '排骨': 292, '姜': 80, '酱油': 63, '西兰花': 34, '牛肉': 250,
+  '土豆': 77, '胡萝卜': 41, '牛奶': 54, '苹果': 52, '香蕉': 89, '酸奶': 72, '白菜': 13,
+  '干辣椒': 324, '鸡翅': 290, '可乐': 42, '五花肉': 518, '蒜苗': 37, '豆瓣酱': 178,
+  '蔬菜': 25, '豆腐': 76, '鱼': 206, '虾': 99, '米饭': 130, '面条': 137, '面包': 265,
+  '馒头': 223, '玉米': 86, '红薯': 86, '洋葱': 40, '蘑菇': 22, '菠菜': 23, '芹菜': 14,
+  '韭菜': 30, '茄子': 25, '豆角': 31, '冬瓜': 12, '南瓜': 26, '丝瓜': 20, '苦瓜': 19,
+  '莴笋': 15, '芦笋': 20, '木耳': 27, '海带': 13, '紫菜': 250, '花生': 567, '核桃': 654,
+  '芝麻': 573, '红豆': 329, '绿豆': 316, '黄豆': 359, '黑豆': 381, '小米': 361, '燕麦': 389,
+  '紫薯': 82, '芋头': 56, '山药': 57, '莲藕': 47, '木耳菜': 20, '油麦菜': 15, '生菜': 15,
+  '油菜': 14, '芥蓝': 19, '菜心': 18, '茼蒿': 21, '香菜': 23, '茴香': 31, '大葱': 33,
+  '小葱': 31, '蒜苗': 37, '蒜苔': 61, '生姜': 80, '蒜黄': 32, '韭黄': 34, '韭菜花': 32,
+  '秋葵': 33, '荷兰豆': 27, '四季豆': 31, '豌豆': 81, '毛豆': 131, '蚕豆': 335, '扁豆': 116,
+  '金针菇': 32, '香菇': 26, '平菇': 24, '杏鲍菇': 35, '鸡腿菇': 30, '草菇': 27, '口蘑': 29,
+  '银耳': 200, '竹荪': 155, '腐竹': 461, '豆腐皮': 260, '千张': 262, '豆干': 197, '素鸡': 192,
+  '鸭血': 108, '猪血': 55, '鸡血': 49, '牛肚': 72, '猪肚': 110, '猪肝': 129, '鸡肝': 121,
+  '鸭肝': 129, '牛肝': 135, '羊肝': 134, '猪心': 119, '牛心': 106, '鸡心': 172, '鸭心': 120,
+  '猪蹄': 260, '猪耳': 176, '猪大肠': 191, '猪小肠': 65, '猪皮': 363, '牛蹄筋': 151,
+  '鸡爪': 254, '鸭爪': 150, '鸡翅中': 202, '鸡翅根': 202, '鸡腿': 146, '鸭腿': 190,
+  '鸡胸': 165, '鸭胸': 146, '鹅肉': 371, '鸽肉': 213, '鹌鹑': 110, '火鸡': 135,
+  '羊肉': 203, '羊排': 360, '牛肉卷': 250, '肥牛': 250, '肥羊': 250, '牛排': 271,
+  '猪里脊': 109, '猪后腿': 160, '猪前腿': 195, '猪五花': 518, '梅花肉': 248, '腱子肉': 160,
+  '牛腩': 332, '牛腱': 160, '牛尾': 282, '羊腿': 203, '羊蝎子': 159,
+  '草鱼': 93, '鲤鱼': 109, '鲫鱼': 108, '鲈鱼': 105, '鳜鱼': 117, '黄鱼': 97, '带鱼': 127,
+  '三文鱼': 139, '鳕鱼': 82, '金枪鱼': 132, '鲅鱼': 121, '比目鱼': 91, '鱿鱼': 92, '墨鱼': 79,
+  '章鱼': 81, '虾仁': 48, '基围虾': 101, '对虾': 93, '河虾': 84, '皮皮虾': 90, '龙虾': 90,
+  '螃蟹': 97, '大闸蟹': 102, '海蟹': 95, '蛤蜊': 62, '花蛤': 62, '蛏子': 40, '扇贝': 70,
+  '生蚝': 68, '鲍鱼': 85, '海螺': 95, '田螺': 60, '海蜇': 33, '海参': 78, '海胆': 120,
+  '紫菜': 250, '海带': 13, '裙带菜': 45, '海苔': 270, '虾皮': 153, '蟹棒': 123, '鱼丸': 107,
+  '虾滑': 80, '午餐肉': 229, '火腿': 196, '香肠': 346, '腊肠': 584, '腊肉': 692, '培根': 476,
+  '牛肉干': 550, '猪肉脯': 378, '肉松': 396, '鸭脖': 264, '鸭舌': 267, '鸭翅': 217,
+  '苹果': 52, '香蕉': 89, '橙子': 47, '橘子': 44, '柚子': 42, '柠檬': 37, '梨': 57,
+  '桃': 39, '李子': 38, '樱桃': 63, '葡萄': 69, '提子': 69, '草莓': 32, '蓝莓': 57,
+  '猕猴桃': 61, '芒果': 60, '菠萝': 50, '木瓜': 39, '火龙果': 51, '西瓜': 30, '哈密瓜': 34,
+  '香瓜': 26, '榴莲': 147, '荔枝': 66, '龙眼': 71, '杨梅': 30, '枇杷': 41, '椰子': 354,
+  '甘蔗': 64, '柿子': 71, '石榴': 63, '红枣': 276, '枸杞': 258, '山楂': 102, '葡萄干': 299,
+  '牛奶': 54, '酸奶': 72, '奶粉': 484, '奶酪': 328, '奶油': 879, '黄油': 717, '芝士': 328,
+  '冰淇淋': 207, '雪糕': 150, '巧克力': 546, '白糖': 400, '红糖': 389, '蜂蜜': 304,
+  '花生油': 899, '橄榄油': 884, '菜籽油': 884, '豆油': 884, '玉米油': 884, '葵花籽油': 884,
+  '芝麻油': 884, '猪油': 902, '盐': 0, '生抽': 20, '老抽': 30, '蚝油': 111, '料酒': 69,
+  '醋': 31, '番茄酱': 97, '沙拉酱': 449, '豆瓣酱': 178, '甜面酱': 136, '辣椒酱': 108,
+  '咖喱': 325, '花椒': 316, '八角': 331, '桂皮': 247, '香叶': 311, '孜然': 375,
+}
+
+function estimateIngredientCalories(name) {
+  for (const key in CALORIE_TABLE) {
+    if (name.includes(key) || key.includes(name)) return CALORIE_TABLE[key]
+  }
+  return 0
+}
+
+export function estimateRecipeCalories(recipe) {
+  if (!recipe || !recipe.ingredients) return 0
+  return recipe.ingredients.reduce((sum, ing) => sum + estimateIngredientCalories(ing), 0)
+}
+
 class FoodStore {
   constructor() {
     this.state = reactive({
@@ -41,6 +119,7 @@ class FoodStore {
       templates: [],
       shopList: [],
       recipes: RECIPES,
+      user: { ...DEFAULT_USER },
     })
   }
 
@@ -277,6 +356,7 @@ class FoodStore {
 
   getRecommendedRecipes() {
     const foodNames = new Set(this.state.foods.map(f => f.name))
+    const userGoal = this.state.user.goal || '均衡饮食'
     const results = []
     for (const r of this.state.recipes) {
       const matched = r.ingredients.filter(ing =>
@@ -286,11 +366,35 @@ class FoodStore {
         ![...foodNames].some(fn => fn.includes(ing) || ing.includes(fn))
       )
       const ratio = r.ingredients.length > 0 ? matched.length / r.ingredients.length : 0
+      const calories = estimateRecipeCalories(r)
+      const goalTags = this.getRecipeGoalTags(r, calories, userGoal)
       if (matched.length > 0) {
-        results.push({ ...r, matchedCount: matched.length, matched, unmatched, ratio })
+        results.push({ ...r, matchedCount: matched.length, matched, unmatched, ratio, calories, goalTags })
       }
     }
     return results.sort((a, b) => b.ratio - a.ratio || b.matchedCount - a.matchedCount)
+  }
+
+  getRecipeGoalTags(recipe, calories, userGoal) {
+    const tags = []
+    const highProtein = ['鸡胸', '牛肉', '鸡蛋', '虾', '鱼', '豆腐', '牛奶', '鸡腿', '瘦肉', '三文鱼']
+    const lowFat = ['蔬菜', '西兰花', '黄瓜', '番茄', '白菜', '菠菜', '芹菜', '冬瓜']
+    const hasHighProtein = recipe.ingredients.some(ing => highProtein.some(k => ing.includes(k) || k.includes(ing)))
+    const hasLowFat = recipe.ingredients.some(ing => lowFat.some(k => ing.includes(k) || k.includes(ing)))
+    const hasMeat = ['肉', '鸡', '牛', '羊', '鱼', '虾', '排骨'].some(k => recipe.ingredients.some(ing => ing.includes(k)))
+    const mostlyVeg = recipe.ingredients.length > 0 && !hasMeat
+
+    if (userGoal === '减脂') {
+      if (calories < 400) tags.push('低卡')
+      if (mostlyVeg || hasLowFat) tags.push('清淡')
+    } else if (userGoal === '增肌') {
+      if (hasHighProtein) tags.push('高蛋白')
+    } else if (userGoal === '养生') {
+      if (mostlyVeg || hasLowFat) tags.push('清淡')
+      if (calories < 500) tags.push('低负担')
+    }
+    if (hasHighProtein && userGoal !== '减脂') tags.push('高蛋白')
+    return tags
   }
 
   addRecipe(recipe) {
@@ -336,6 +440,50 @@ class FoodStore {
     } catch (e) {
       console.error('[FFood] 菜谱加载失败:', e)
     }
+  }
+
+  // ==================== 用户资料（我的） ====================
+
+  get user() { return this.state.user }
+
+  saveUser(user) {
+    try {
+      this.state.user = { ...DEFAULT_USER, ...user }
+      localStorage.setItem(USER_KEY, JSON.stringify(this.state.user))
+    } catch (e) {
+      console.error('[FFood] 用户资料保存失败:', e)
+    }
+  }
+
+  loadUser() {
+    try {
+      const raw = localStorage.getItem(USER_KEY)
+      if (raw) {
+        this.state.user = { ...DEFAULT_USER, ...JSON.parse(raw) }
+      }
+    } catch (e) {
+      console.error('[FFood] 用户资料加载失败:', e)
+      this.state.user = { ...DEFAULT_USER }
+    }
+  }
+
+  // ==================== 营养统计 ====================
+
+  getNutritionSummary() {
+    let totalCalories = 0
+    let proteinScore = 0
+    let vegCount = 0
+    let meatCount = 0
+    for (const f of this.state.foods) {
+      const cal = estimateIngredientCalories(f.name)
+      if (cal > 0) {
+        totalCalories += cal * (parseFloat(f.quantity) || 1)
+      }
+      if (['蔬菜', '水果'].includes(f.category)) vegCount++
+      if (f.category === '肉类' || ['鸡', '牛', '羊', '鱼', '虾', '肉', '排骨'].some(k => f.name.includes(k))) meatCount++
+      if (['鸡胸', '牛肉', '鸡蛋', '虾', '鱼', '豆腐', '牛奶', '鸡腿', '瘦肉', '三文鱼'].some(k => f.name.includes(k))) proteinScore += 1
+    }
+    return { totalCalories: Math.round(totalCalories), vegCount, meatCount, proteinScore }
   }
 
   // ==================== 条形码 (P2-3) ====================

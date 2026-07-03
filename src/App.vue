@@ -5,7 +5,8 @@
       <div class="nav-title">
         <template v-if="activeTab === 'food'">🥬 食材管理</template>
         <template v-else-if="activeTab === 'shop'">🛒 购物清单</template>
-        <template v-else>🍳 菜谱推荐</template>
+        <template v-else-if="activeTab === 'recipes'">🍳 菜谱推荐</template>
+        <template v-else>👤 我的</template>
       </div>
       <div class="nav-actions">
         <button class="nav-btn" v-if="activeTab === 'food'" @click="showStatsPanel = true" title="统计">📊</button>
@@ -125,7 +126,7 @@
     <div class="recipe-list" v-if="activeTab === 'recipes'">
       <div class="recipe-header-bar">
         <div class="recipe-hint" v-if="foodStore.totalCount > 0">
-          🧑‍🍳 基于冰箱里的 <strong>{{ foodStore.totalCount }}</strong> 件食材，猜你喜欢：
+          🧑‍🍳 基于冰箱里的 <strong>{{ foodStore.totalCount }}</strong> 件食材自动同步，猜你喜欢：
         </div>
         <div class="recipe-hint" v-else>🧑‍🍳 冰箱还是空的，先添加食材才能匹配菜谱哦～</div>
         <button class="btn-add-recipe" @click="openRecipeModal">+ 自定义菜谱</button>
@@ -142,7 +143,10 @@
           <span class="recipe-emoji">{{ r.emoji }}</span>
           <div class="recipe-info">
             <div class="recipe-name">{{ r.name }}</div>
-            <div class="recipe-meta">{{ r.difficulty }} · ⏱ {{ r.time }}分钟</div>
+            <div class="recipe-meta">{{ r.difficulty }} · ⏱ {{ r.time }}分钟 · 🔥 {{ r.calories }} kcal</div>
+            <div class="recipe-goal-tags" v-if="r.goalTags.length">
+              <span v-for="tag in r.goalTags" :key="tag" class="goal-tag">{{ tag }}</span>
+            </div>
           </div>
           <div :class="['recipe-match-badge', r.ratio >= 1 ? 'match-full' : r.ratio >= 0.5 ? 'match-high' : 'match-low']">
             {{ r.ratio >= 1 ? '✅ 全部齐备' : `缺${r.unmatched.length}种` }}
@@ -185,6 +189,78 @@
       </div>
     </div>
 
+    <!-- ==================== 我的 Tab ==================== -->
+    <div class="profile-list" v-if="activeTab === 'profile'">
+      <div class="profile-card profile-header-card">
+        <div class="profile-avatar">{{ userForm.nickname ? userForm.nickname.slice(0,1) : '👤' }}</div>
+        <div class="profile-info">
+          <div class="profile-name">{{ userForm.nickname || '未设置昵称' }}</div>
+          <div class="profile-goal">{{ userForm.goal }}</div>
+        </div>
+      </div>
+
+      <div class="profile-card">
+        <div class="profile-card-title">个人资料</div>
+        <div class="form-group">
+          <label class="form-label">昵称</label>
+          <input v-model="userForm.nickname" class="form-input" placeholder="怎么称呼你" maxlength="12" />
+        </div>
+        <div class="form-row">
+          <div class="form-group flex-1">
+            <label class="form-label">身高（cm）</label>
+            <input v-model.number="userForm.height" type="number" class="form-input" placeholder="0" min="1" max="300" />
+          </div>
+          <div class="form-group flex-1">
+            <label class="form-label">体重（kg）</label>
+            <input v-model.number="userForm.weight" type="number" class="form-input" placeholder="0" min="1" max="300" />
+          </div>
+          <div class="form-group flex-1">
+            <label class="form-label">年龄</label>
+            <input v-model.number="userForm.age" type="number" class="form-input" placeholder="0" min="1" max="150" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">健康目标</label>
+          <div class="goal-picker">
+            <button v-for="g in goalOptions" :key="g" :class="['goal-chip', { active: userForm.goal === g }]" @click="userForm.goal = g">{{ g }}</button>
+          </div>
+        </div>
+        <button class="btn-save profile-save" @click="saveUserProfile">保存资料</button>
+      </div>
+
+      <div class="profile-card">
+        <div class="profile-card-title">冰箱营养概览</div>
+        <div class="nutrition-grid">
+          <div class="nutrition-item">
+            <div class="nutrition-value">{{ nutritionSummary.totalCalories }}</div>
+            <div class="nutrition-label">估算热量（kcal）</div>
+          </div>
+          <div class="nutrition-item">
+            <div class="nutrition-value">{{ nutritionSummary.vegCount }}</div>
+            <div class="nutrition-label">蔬果</div>
+          </div>
+          <div class="nutrition-item">
+            <div class="nutrition-value">{{ nutritionSummary.meatCount }}</div>
+            <div class="nutrition-label">肉蛋水产</div>
+          </div>
+          <div class="nutrition-item">
+            <div class="nutrition-value">{{ nutritionSummary.proteinScore }}</div>
+            <div class="nutrition-label">高蛋白食材</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="profile-card">
+        <div class="profile-card-title">今天吃什么</div>
+        <div class="what-to-eat" @click="pickRandomRecipe">
+          <div class="wte-icon">🎲</div>
+          <div class="wte-result" v-if="randomRecipe">{{ randomRecipe.emoji }} {{ randomRecipe.name }}</div>
+          <div class="wte-hint" v-else>点我随机选一道菜谱</div>
+        </div>
+        <button class="btn-save wte-btn" @click="pickRandomRecipe">摇一摇</button>
+      </div>
+    </div>
+
     <!-- FAB -->
     <button class="fab" v-if="activeTab === 'food'" @click="openAddModal">+</button>
 
@@ -199,6 +275,9 @@
       <button :class="['tab-item', { active: activeTab === 'shop' }]" @click="switchTab('shop')">
         <span class="tab-icon">🛒</span><span class="tab-label">购物清单</span>
         <span class="tab-badge" v-if="shopUncheckedCount">{{ shopUncheckedCount }}</span>
+      </button>
+      <button :class="['tab-item', { active: activeTab === 'profile' }]" @click="switchTab('profile')">
+        <span class="tab-icon">👤</span><span class="tab-label">我的</span>
       </button>
     </nav>
 
@@ -315,6 +394,12 @@
               </div>
             </div>
             <div v-if="errors.days" class="form-error">{{ errors.days }}</div>
+            <div class="days-recommend" v-if="recommendedDays">
+              <span class="days-recommend-label">推荐保质期</span>
+              <button class="days-recommend-chip" @click="form.days = recommendedDays; validateDayField()">
+                {{ recommendedDays }} 天
+              </button>
+            </div>
             <div class="expiry-preview" v-if="computedExpiry">📅 到期日：<strong>{{ computedExpiry }}</strong></div>
           </div>
           <div class="form-group">
@@ -405,8 +490,8 @@
 </template>
 
 <script setup>
-import { ref, computed, reactive, onMounted } from 'vue'
-import { useFoodStore, validateFoodName, validateQuantity as checkQuantity, validateDays as checkDays } from './store/foodStore.js'
+import { ref, computed, reactive, onMounted, watch } from 'vue'
+import { useFoodStore, validateFoodName, validateQuantity as checkQuantity, validateDays as checkDays, recommendDays, GOAL_OPTIONS } from './store/foodStore.js'
 
 const foodStore = useFoodStore()
 
@@ -427,6 +512,15 @@ const todayStr = new Date().toISOString().slice(0, 10)
 // ========== Tab ==========
 const activeTab = ref('food')
 function switchTab(tab) { activeTab.value = tab; if (tab === 'food') { exitBatchMode() } }
+
+// ========== 我的 / NutritionMaster 参考 ==========
+const goalOptions = GOAL_OPTIONS
+const userForm = reactive({ ...foodStore.user })
+const randomRecipe = ref(null)
+const nutritionSummary = computed(() => foodStore.getNutritionSummary())
+function saveUserProfile() {
+  foodStore.saveUser({ ...userForm })
+}
 
 // ========== 搜索 & 筛选 ==========
 const searchText = ref(''); const activeCategory = ref('all'); const activeStorage = ref('all')
@@ -528,6 +622,13 @@ const computedExpiry = computed(() => {
   const d = new Date(form.value.purchaseDate); d.setDate(d.getDate() + Math.ceil(parseFloat(form.value.days) || 0))
   return isNaN(d.getTime()) ? '' : `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()}`
 })
+const recommendedDays = computed(() => recommendDays(form.value.category, form.value.storage))
+watch([() => form.value.category, () => form.value.storage], () => {
+  if (!editingFood.value && showAddModal.value) {
+    form.value.days = recommendDays(form.value.category, form.value.storage)
+    validateDayField()
+  }
+})
 function recalcExpiry() {}
 function validateName() { const r = validateFoodName(form.value.name); errors.name = r.message; return r.valid }
 function validateQty() { const r = checkQuantity(form.value.quantity); errors.quantity = r.message; return r.valid }
@@ -536,7 +637,14 @@ function validateAll() { return validateName() & validateQty() & validateDayFiel
 const isFormValid = computed(() => form.value.name.trim() !== '' && errors.name === '' && errors.quantity === '' && errors.days === '')
 function fillTemplate(tpl) { form.value.name = tpl.name; form.value.quantity = tpl.quantity; form.value.unit = tpl.unit; form.value.category = tpl.category; form.value.storage = tpl.storage; errors.name = ''; errors.quantity = ''; errors.days = '' }
 
-function openAddModal() { editingFood.value = null; form.value = getDefaultForm(); errors.name = ''; errors.quantity = ''; errors.days = ''; showAddModal.value = true }
+function openAddModal() {
+  editingFood.value = null
+  const defaults = getDefaultForm()
+  defaults.days = recommendDays(defaults.category, defaults.storage)
+  form.value = defaults
+  errors.name = ''; errors.quantity = ''; errors.days = ''
+  showAddModal.value = true
+}
 function closeModal() { showAddModal.value = false; editingFood.value = null }
 function editFood(food) {
   editingFood.value = food; form.value = { name:food.name, quantity:food.quantity, unit:food.unit||'个', days:food.days, category:food.category, storage:food.storage, purchaseDate:food.purchaseDate||todayStr }
@@ -597,6 +705,16 @@ function addShopItem() { foodStore.addShopItem(shopInput.value); shopInput.value
 const expandedRecipe = ref(null)
 const recommendedRecipes = computed(() => foodStore.getRecommendedRecipes())
 function toggleRecipeDetail(id) { expandedRecipe.value = expandedRecipe.value === id ? null : id }
+function pickRandomRecipe() {
+  const recipes = recommendedRecipes.value.length ? recommendedRecipes.value : foodStore.recipes
+  if (recipes.length === 0) return
+  randomRecipe.value = recipes[Math.floor(Math.random() * recipes.length)]
+}
+watch(recommendedRecipes, () => {
+  if (randomRecipe.value && !recommendedRecipes.value.some(r => r.id === randomRecipe.value.id)) {
+    randomRecipe.value = null
+  }
+})
 function addMissingToShopList(recipe) {
   for (const ing of recipe.unmatched) { foodStore.addShopItem(ing) }
 }
@@ -651,5 +769,5 @@ function checkExpiryNotification() {
 function requestNotification() { if ('Notification' in window && Notification.permission==='default') Notification.requestPermission().then(p=>{if(p==='granted') checkExpiryNotification()}) }
 function startNotificationTimer() { if (nt) clearInterval(nt); nt = setInterval(checkExpiryNotification, 1000*60*60*4) }
 
-onMounted(() => { foodStore.load(); foodStore.loadTemplates(); foodStore.loadShopList(); foodStore.loadRecipes(); requestNotification(); checkExpiryNotification(); startNotificationTimer() })
+onMounted(() => { foodStore.load(); foodStore.loadTemplates(); foodStore.loadShopList(); foodStore.loadRecipes(); foodStore.loadUser(); Object.assign(userForm, foodStore.user); requestNotification(); checkExpiryNotification(); startNotificationTimer() })
 </script>

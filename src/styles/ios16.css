@@ -286,12 +286,16 @@ select:focus {
 
 .food-card-actions {
   position: absolute;
-  inset: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 80px;
   display: flex;
   justify-content: flex-end;
   align-items: stretch;
   background: var(--red);
   z-index: 1;
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
 }
 
 .food-action-btn {
@@ -902,6 +906,34 @@ select.form-input {
 .expiry-preview strong {
   font-weight: 700;
   color: #2d9d4a;
+}
+
+.days-recommend {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.days-recommend-label {
+  font-size: var(--font-footnote);
+  color: var(--text-tertiary);
+}
+
+.days-recommend-chip {
+  padding: 4px 10px;
+  border: none;
+  border-radius: 12px;
+  background: rgba(0, 122, 255, 0.08);
+  color: var(--blue);
+  font-size: var(--font-footnote);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.days-recommend-chip:active {
+  background: rgba(0, 122, 255, 0.18);
 }
 
 /* ===== 空状态更新 ===== */
@@ -1549,6 +1581,167 @@ select.form-input {
   opacity: 1;
   max-height: 500px;
 }
+
+.recipe-goal-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.goal-tag {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 8px;
+  background: rgba(175, 82, 222, 0.1);
+  color: var(--purple);
+}
+
+/* ===== 我的 / NutritionMaster 参考 ===== */
+.profile-list {
+  padding-bottom: 100px;
+}
+
+.profile-card {
+  background: var(--bg-card);
+  backdrop-filter: var(--blur-card);
+  -webkit-backdrop-filter: var(--blur-card);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  margin-bottom: 12px;
+  box-shadow: var(--shadow-sm);
+}
+
+.profile-header-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.profile-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--blue), var(--teal));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  color: var(--text-inverse);
+  flex-shrink: 0;
+}
+
+.profile-name {
+  font-size: var(--font-title3);
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.profile-goal {
+  font-size: var(--font-footnote);
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+.profile-card-title {
+  font-size: var(--font-headline);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 14px;
+}
+
+.form-row {
+  display: flex;
+  gap: 10px;
+}
+
+.flex-1 { flex: 1; }
+
+.goal-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.goal-chip {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 16px;
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  font-size: var(--font-callout);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.goal-chip.active {
+  background: rgba(0, 122, 255, 0.12);
+  color: var(--blue);
+}
+
+.profile-save {
+  width: 100%;
+  margin-top: 6px;
+}
+
+.nutrition-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.nutrition-item {
+  text-align: center;
+  padding: 14px 8px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-secondary);
+}
+
+.nutrition-value {
+  font-size: var(--font-title2);
+  font-weight: 700;
+  color: var(--blue);
+  line-height: 1.2;
+}
+
+.nutrition-label {
+  font-size: var(--font-footnote);
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+.what-to-eat {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 8px;
+  padding: 24px;
+  border-radius: var(--radius-md);
+  background: var(--bg-secondary);
+  margin-bottom: 12px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.what-to-eat:active { background: rgba(0, 122, 255, 0.08); }
+
+.wte-icon { font-size: 36px; }
+
+.wte-result {
+  font-size: var(--font-title3);
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.wte-hint {
+  font-size: var(--font-callout);
+  color: var(--text-secondary);
+}
+
+.wte-btn { width: 100%; }
 
 /* ===== 扫码录入 (P2-3) ===== */
 .barcode-input-row {
