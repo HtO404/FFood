@@ -75,7 +75,7 @@
       <div v-if="recipeBatch.batchMode.value" class="batch-toolbar-fixed">
         <div class="batch-toolbar-inner">
           <button class="batch-btn" @click="recipeBatch.toggleSelectAll()">{{ recipeBatch.allSelected.value ? '取消全选' : '全选' }}</button>
-          <span class="batch-info">已选 {{ recipeBatch.selectedIds.value.size }}（仅自定义可删）</span>
+          <span class="batch-info">已选 {{ recipeBatch.selectedIds.value.size }}</span>
           <button class="batch-btn batch-delete" :disabled="recipeBatch.selectedIds.value.size === 0" @click="onRecipeBatchDelete">删除</button>
           <button class="batch-btn batch-done" @click="recipeBatch.exitBatchMode()">完成</button>
         </div>
@@ -195,7 +195,10 @@
     <!-- ==================== 菜谱推荐 Tab (P2-2) ==================== -->
     <div class="recipe-list" v-if="activeTab === 'recipes'">
       <div class="recipe-header-bar">
-        <div class="recipe-hint" v-if="foodStore.totalCount > 0">
+        <div class="recipe-hint" v-if="recipeBatch.batchMode.value">
+          🔒 内置菜谱不可删除，仅可勾选自定义菜谱
+        </div>
+        <div class="recipe-hint" v-else-if="foodStore.totalCount > 0">
           🧑‍🍳 基于冰箱里的 <strong>{{ foodStore.totalCount }}</strong> 件食材自动同步，猜你喜欢：
         </div>
         <div class="recipe-hint" v-else>🧑‍🍳 冰箱还是空的，先添加食材才能匹配菜谱哦～</div>

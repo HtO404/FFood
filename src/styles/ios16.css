@@ -1871,10 +1871,12 @@ select.form-input {
   bottom: var(--batch-toolbar-bottom);
   left: 50%;
   transform: translateX(-50%);
-  width: min(480px, 100vw);
+  width: 100%;
+  max-width: 480px;
   z-index: var(--z-batch-toolbar);
   padding: 0 var(--spacing-md) 8px;
   pointer-events: none;
+  box-sizing: border-box;
 }
 
 .batch-toolbar-inner {
@@ -1892,10 +1894,14 @@ select.form-input {
 
 .batch-toolbar-inner .batch-info {
   flex: 1;
+  min-width: 0;
   text-align: center;
   font-size: var(--font-subhead);
   font-weight: 600;
   color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .batch-toolbar-inner .batch-btn {
@@ -2102,9 +2108,9 @@ select.form-input {
   .shop-item-card { gap: 8px; padding: 10px 12px; }
 
   /* 批量工具栏：压缩 padding/字号，确保 320px 屏 4 按钮不换行 */
-  .batch-toolbar-inner { gap: 6px; padding: 8px 10px; }
-  .batch-toolbar-inner .batch-btn { padding: 6px 10px; font-size: 13px; }
-  .batch-toolbar-inner .batch-info { font-size: 13px; }
+  .batch-toolbar-inner { gap: 5px; padding: 8px 8px; }
+  .batch-toolbar-inner .batch-btn { padding: 6px 9px; font-size: 13px; }
+  .batch-toolbar-inner .batch-info { font-size: 13px; padding: 0 2px; }
 
   /* modal 收紧 padding，确保 320×568 标题+输入+按钮完整可见 */
   .modal-sheet { padding-top: var(--spacing-sm); }
