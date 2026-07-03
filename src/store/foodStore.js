@@ -368,9 +368,7 @@ class FoodStore {
       const ratio = r.ingredients.length > 0 ? matched.length / r.ingredients.length : 0
       const calories = estimateRecipeCalories(r)
       const goalTags = this.getRecipeGoalTags(r, calories, userGoal)
-      if (matched.length > 0) {
-        results.push({ ...r, matchedCount: matched.length, matched, unmatched, ratio, calories, goalTags })
-      }
+      results.push({ ...r, matchedCount: matched.length, matched, unmatched, ratio, calories, goalTags })
     }
     return results.sort((a, b) => b.ratio - a.ratio || b.matchedCount - a.matchedCount)
   }

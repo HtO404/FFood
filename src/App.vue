@@ -148,8 +148,8 @@
               <span v-for="tag in r.goalTags" :key="tag" class="goal-tag">{{ tag }}</span>
             </div>
           </div>
-          <div :class="['recipe-match-badge', r.ratio >= 1 ? 'match-full' : r.ratio >= 0.5 ? 'match-high' : 'match-low']">
-            {{ r.ratio >= 1 ? '✅ 全部齐备' : `缺${r.unmatched.length}种` }}
+          <div :class="['recipe-match-badge', r.ratio >= 1 ? 'match-full' : r.ratio > 0 ? 'match-high' : 'match-none']">
+            {{ r.ratio >= 1 ? '✅ 全部齐备' : r.ratio > 0 ? `缺${r.unmatched.length}种` : '未匹配' }}
           </div>
         </div>
         <div class="recipe-ingredients-preview">
@@ -357,61 +357,63 @@
       <div v-if="showAddModal" class="modal-overlay" @click.self="closeModal">
         <div class="modal-sheet">
           <div class="modal-handle" /><h3 class="modal-title">{{ editingFood ? '编辑食材' : '添加食材' }}</h3>
-          <div v-if="!editingFood && foodStore.templates.length" class="templates-section">
-            <div class="form-label">从历史快速添加</div>
-            <div class="templates-scroll">
-              <div v-for="(tpl, i) in foodStore.templates.slice(0, 6)" :key="i" class="template-chip" @click="fillTemplate(tpl)">
-                <span>{{ tpl.name }}</span><span class="template-chip-del" @click.stop="foodStore.removeTemplate(i)">✕</span>
+          <div class="modal-body">
+            <div v-if="!editingFood && foodStore.templates.length" class="templates-section">
+              <div class="form-label">从历史快速添加</div>
+              <div class="templates-scroll">
+                <div v-for="(tpl, i) in foodStore.templates.slice(0, 6)" :key="i" class="template-chip" @click="fillTemplate(tpl)">
+                  <span>{{ tpl.name }}</span><span class="template-chip-del" @click.stop="foodStore.removeTemplate(i)">✕</span>
+                </div>
               </div>
             </div>
-          </div>
-          <div class="form-group">
-            <label class="form-label">名称 *</label>
-            <input v-model="form.name" :class="['form-input', { 'form-input-error': errors.name }]"
-              placeholder="例：西红柿、鸡胸肉…" maxlength="20" @input="validateName()" @blur="validateName()" />
-            <div v-if="errors.name" class="form-error">{{ errors.name }}</div>
-          </div>
-          <div class="form-group">
-            <label class="form-label">数量 *</label>
-            <div class="qty-row">
-              <input v-model="form.quantity" :class="['form-input', 'qty-input', { 'form-input-error': errors.quantity }]"
-                type="number" step="0.1" min="0.1" max="99.9" placeholder="0.1~99.9" @input="validateQty()" @blur="validateQty()" />
-              <div class="unit-picker">
-                <button v-for="u in units" :key="u" :class="['unit-chip', { active: form.unit === u }]" @click="form.unit = u">{{ u }}</button>
+            <div class="form-group">
+              <label class="form-label">名称 *</label>
+              <input v-model="form.name" :class="['form-input', { 'form-input-error': errors.name }]"
+                placeholder="例：西红柿、鸡胸肉…" maxlength="20" @input="validateName()" @blur="validateName()" />
+              <div v-if="errors.name" class="form-error">{{ errors.name }}</div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">数量 *</label>
+              <div class="qty-row">
+                <input v-model="form.quantity" :class="['form-input', 'qty-input', { 'form-input-error': errors.quantity }]"
+                  type="number" step="0.1" min="0.1" max="99.9" placeholder="0.1~99.9" @input="validateQty()" @blur="validateQty()" />
+                <div class="unit-picker">
+                  <button v-for="u in units" :key="u" :class="['unit-chip', { active: form.unit === u }]" @click="form.unit = u">{{ u }}</button>
+                </div>
+              </div>
+              <div v-if="errors.quantity" class="form-error">{{ errors.quantity }}</div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">购买日期 · 保质期 *</label>
+              <div class="date-dual-row">
+                <div class="date-col"><input v-model="form.purchaseDate" type="date" class="form-input date-input" :max="todayStr" @change="recalcExpiry()" /></div>
+                <span class="date-arrow">→</span>
+                <div class="date-col days-col">
+                  <input v-model="form.days" :class="['form-input', { 'form-input-error': errors.days }]" type="number"
+                    step="0.1" min="0.1" max="99.9" placeholder="天数" @input="validateDayField(); recalcExpiry()" @blur="validateDayField(); recalcExpiry()" />
+                  <span class="days-suffix">天</span>
+                </div>
+              </div>
+              <div v-if="errors.days" class="form-error">{{ errors.days }}</div>
+              <div class="days-recommend" v-if="recommendedDays">
+                <span class="days-recommend-label">推荐保质期</span>
+                <button class="days-recommend-chip" @click="form.days = recommendedDays; validateDayField()">
+                  {{ recommendedDays }} 天
+                </button>
+              </div>
+              <div class="expiry-preview" v-if="computedExpiry">📅 到期日：<strong>{{ computedExpiry }}</strong></div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">分类</label>
+              <div class="category-picker">
+                <button v-for="cat in foodCategories" :key="cat.key" :class="['category-option', { active: form.category === cat.key }]" @click="form.category = cat.key">{{ cat.emoji }} {{ cat.label }}</button>
               </div>
             </div>
-            <div v-if="errors.quantity" class="form-error">{{ errors.quantity }}</div>
-          </div>
-          <div class="form-group">
-            <label class="form-label">购买日期 · 保质期 *</label>
-            <div class="date-dual-row">
-              <div class="date-col"><input v-model="form.purchaseDate" type="date" class="form-input date-input" :max="todayStr" @change="recalcExpiry()" /></div>
-              <span class="date-arrow">→</span>
-              <div class="date-col days-col">
-                <input v-model="form.days" :class="['form-input', { 'form-input-error': errors.days }]" type="number"
-                  step="0.1" min="0.1" max="99.9" placeholder="天数" @input="validateDayField(); recalcExpiry()" @blur="validateDayField(); recalcExpiry()" />
-                <span class="days-suffix">天</span>
+            <div class="form-group">
+              <label class="form-label">存放位置</label>
+              <div class="storage-picker">
+                <button v-for="s in storages" :key="s" :class="['storage-option', { active: form.storage === s }]" @click="form.storage = s">{{ storageIcon(s) }} {{ s }}</button>
               </div>
-            </div>
-            <div v-if="errors.days" class="form-error">{{ errors.days }}</div>
-            <div class="days-recommend" v-if="recommendedDays">
-              <span class="days-recommend-label">推荐保质期</span>
-              <button class="days-recommend-chip" @click="form.days = recommendedDays; validateDayField()">
-                {{ recommendedDays }} 天
-              </button>
-            </div>
-            <div class="expiry-preview" v-if="computedExpiry">📅 到期日：<strong>{{ computedExpiry }}</strong></div>
-          </div>
-          <div class="form-group">
-            <label class="form-label">分类</label>
-            <div class="category-picker">
-              <button v-for="cat in foodCategories" :key="cat.key" :class="['category-option', { active: form.category === cat.key }]" @click="form.category = cat.key">{{ cat.emoji }} {{ cat.label }}</button>
-            </div>
-          </div>
-          <div class="form-group">
-            <label class="form-label">存放位置</label>
-            <div class="storage-picker">
-              <button v-for="s in storages" :key="s" :class="['storage-option', { active: form.storage === s }]" @click="form.storage = s">{{ storageIcon(s) }} {{ s }}</button>
             </div>
           </div>
           <div class="modal-actions">
@@ -427,31 +429,35 @@
       <div v-if="showRecipeModal" class="modal-overlay" @click.self="closeRecipeModal">
         <div class="modal-sheet">
           <div class="modal-handle" /><h3 class="modal-title">🍳 自定义菜谱</h3>
-          <div class="form-group">
-            <label class="form-label">菜谱名称 *</label>
-            <input v-model="recipeForm.name" class="form-input" placeholder="例：番茄炒蛋" maxlength="20" />
-          </div>
-          <div class="form-group">
-            <label class="form-label">emoji</label>
-            <input v-model="recipeForm.emoji" class="form-input" placeholder="🍳" maxlength="2" />
-          </div>
-          <div class="form-group">
-            <label class="form-label">难度</label>
-            <div class="difficulty-picker">
-              <button v-for="d in difficultyOptions" :key="d" :class="['difficulty-chip', { active: recipeForm.difficulty === d }]" @click="recipeForm.difficulty = d">{{ d }}</button>
+          <div class="modal-body">
+            <div class="form-group">
+              <label class="form-label">菜谱名称 *</label>
+              <input v-model="recipeForm.name" class="form-input" placeholder="例：番茄炒蛋" maxlength="20" />
             </div>
-          </div>
-          <div class="form-group">
-            <label class="form-label">时间（分钟）</label>
-            <input v-model="recipeForm.time" type="number" class="form-input" min="1" max="300" />
-          </div>
-          <div class="form-group">
-            <label class="form-label">所需食材（用逗号分隔）</label>
-            <input v-model="recipeForm.ingredientsText" class="form-input" placeholder="鸡蛋, 番茄, 葱" />
-          </div>
-          <div class="form-group">
-            <label class="form-label">做法步骤（每行一步）</label>
-            <textarea v-model="recipeForm.stepsText" class="form-textarea" rows="4" placeholder="1. 鸡蛋打散..." />
+            <div class="form-row">
+              <div class="form-group flex-1">
+                <label class="form-label">emoji</label>
+                <input v-model="recipeForm.emoji" class="form-input" placeholder="🍳" maxlength="2" />
+              </div>
+              <div class="form-group flex-1">
+                <label class="form-label">时间（分）</label>
+                <input v-model="recipeForm.time" type="number" class="form-input" min="1" max="300" />
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">难度</label>
+              <div class="difficulty-picker">
+                <button v-for="d in difficultyOptions" :key="d" :class="['difficulty-chip', { active: recipeForm.difficulty === d }]" @click="recipeForm.difficulty = d">{{ d }}</button>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">所需食材（用逗号分隔）</label>
+              <input v-model="recipeForm.ingredientsText" class="form-input" placeholder="鸡蛋, 番茄, 葱" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">做法步骤（每行一步）</label>
+              <textarea v-model="recipeForm.stepsText" class="form-textarea" rows="3" placeholder="1. 鸡蛋打散..." />
+            </div>
           </div>
           <div class="modal-actions">
             <button class="btn-cancel" @click="closeRecipeModal">取消</button>
