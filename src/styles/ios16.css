@@ -508,6 +508,10 @@ select:focus {
   z-index: var(--z-modal);
 }
 
+/* 不同 modal 层级递增，避免叠加时同层乱序 */
+.modal-overlay-scan { z-index: calc(var(--z-modal) + 10); }
+.modal-overlay-stats { z-index: calc(var(--z-modal) + 20); }
+
 .modal-sheet {
   width: min(480px, 100vw);
   max-height: 90vh;

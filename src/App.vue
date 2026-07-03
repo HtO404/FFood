@@ -378,7 +378,7 @@
 
     <!-- ==================== 扫码录入弹窗 (P2-3) ==================== -->
     <Transition name="modal">
-      <div v-if="showBarcodeModal" class="modal-overlay" @click.self="showBarcodeModal = false">
+      <div v-if="showBarcodeModal" class="modal-overlay modal-overlay-scan" @click.self="showBarcodeModal = false">
         <div class="modal-sheet">
           <div class="modal-handle" />
           <h3 class="modal-title">📷 扫码录入</h3>
@@ -415,7 +415,7 @@
 
     <!-- 统计面板 -->
     <Transition name="modal">
-      <div v-if="showStatsPanel" class="modal-overlay" @click.self="showStatsPanel = false">
+      <div v-if="showStatsPanel" class="modal-overlay modal-overlay-stats" @click.self="showStatsPanel = false">
         <div class="modal-sheet stats-sheet">
           <div class="modal-handle" /><h3 class="modal-title">📊 食材统计</h3>
           <div class="stats-grid">

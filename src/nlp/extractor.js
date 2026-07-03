@@ -290,8 +290,10 @@ function matchRecipeName(text) {
     .replace(/^[，,。.；;、\s]+|[，,。.；;、\s]+$/g, '')
     .trim()
 
+  // XSS 防御：过滤尖括号、脚本相关字符（虽然 Vue 转义保底，但 NLP 层也清洗）
+  name = name.replace(/[<>`"'\\]/g, '').trim()
+
   if (name.length >= 2 && name.length <= 12) return name
-  // 兜底：取前8字
   if (firstSegment.length >= 2) return firstSegment.slice(0, 8)
   return ''
 }

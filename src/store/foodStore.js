@@ -150,6 +150,9 @@ class FoodStore {
   // ==================== 食材 CRUD ====================
 
   addFood(item) {
+    // store 层防御性校验：即使绕过 UI 也能保证数据安全
+    const nameCheck = validateFoodName(item.name)
+    const safeName = nameCheck.valid ? item.name.trim() : '未命名食材'
     const qty = clampFloat(item.quantity, 0.1, 99.9)
     const days = clampFloat(item.days, 0.1, 99.9)
     const purchaseDate = item.purchaseDate || todayStr()
@@ -157,20 +160,20 @@ class FoodStore {
 
     const food = {
       id: genId(),
-      name: item.name.trim(),
+      name: sanitizeString(safeName, 20),
       quantity: qty,
-      unit: item.unit || '个',
+      unit: validateEnum(item.unit, VALID_UNITS, '个'),
       days,
-      category: item.category || '其他',
+      category: validateEnum(item.category, VALID_CATEGORIES, '其他'),
       purchaseDate,
       expiryDate,
-      storage: item.storage || '冷藏',
+      storage: validateEnum(item.storage, VALID_STORAGES, '冷藏'),
       createdAt: new Date().toISOString(),
       daysLeft: calcDaysLeft(expiryDate),
     }
     this.state.foods.push(food)
     this.save()
-    this.saveTemplate(item)  // 记忆表单
+    this.saveTemplate(item)
   }
 
   updateFood(id, data) {
@@ -183,12 +186,15 @@ class FoodStore {
 
     const updated = {
       ...this.state.foods[idx],
-      ...data,
       id,
+      name: sanitizeString(data.name || this.state.foods[idx].name, 20),
       quantity: qty,
+      unit: validateEnum(data.unit, VALID_UNITS, this.state.foods[idx].unit || '个'),
       days,
+      category: validateEnum(data.category, VALID_CATEGORIES, this.state.foods[idx].category || '其他'),
       purchaseDate,
       expiryDate,
+      storage: validateEnum(data.storage, VALID_STORAGES, this.state.foods[idx].storage || '冷藏'),
       daysLeft: calcDaysLeft(expiryDate),
     }
     this.state.foods[idx] = updated
@@ -301,10 +307,12 @@ class FoodStore {
   }
 
   addShopItem(text) {
-    if (!text || !text.trim()) return
+    if (!text || typeof text !== 'string') return
+    const safe = sanitizeString(text, 30)
+    if (!safe) return
     const item = {
       id: genId(),
-      text: text.trim(),
+      text: safe,
       checked: false,
       createdAt: Date.now(),
     }
@@ -334,13 +342,15 @@ class FoodStore {
 
   /** 带来源标记地添加购物项（菜谱联动用） */
   addShopItemWithSource(text, source) {
-    if (!text || !text.trim()) return
+    if (!text || typeof text !== 'string') return
+    const safe = sanitizeString(text, 30)
+    if (!safe) return
     const item = {
       id: genId(),
-      text: text.trim(),
+      text: safe,
       checked: false,
       createdAt: Date.now(),
-      source: source || '',
+      source: sanitizeString(source || '', 30),
     }
     this.state.shopList.push(item)
     this.saveShopList()
@@ -376,16 +386,19 @@ class FoodStore {
   get recipes() { return this.state.recipes }
 
   getRecommendedRecipes() {
-    const foodNames = new Set(this.state.foods.map(f => f.name))
+    // 性能优化：一次展开 foodNames 数组，避免每次循环都 [...foodNames]
+    const foodNamesArr = this.state.foods.map(f => f.name)
     const userGoal = this.state.user.goal || '均衡饮食'
     const results = []
     for (const r of this.state.recipes) {
-      const matched = r.ingredients.filter(ing =>
-        [...foodNames].some(fn => fn.includes(ing) || ing.includes(fn))
-      )
-      const unmatched = r.ingredients.filter(ing =>
-        ![...foodNames].some(fn => fn.includes(ing) || ing.includes(fn))
-      )
+      // 单次遍历同时计算 matched/unmatched，避免重复 filter
+      const matched = []
+      const unmatched = []
+      for (const ing of r.ingredients) {
+        const isMatched = foodNamesArr.some(fn => fn.includes(ing) || ing.includes(fn))
+        if (isMatched) matched.push(ing)
+        else unmatched.push(ing)
+      }
       const ratio = r.ingredients.length > 0 ? matched.length / r.ingredients.length : 0
       const calories = estimateRecipeCalories(r)
       const goalTags = this.getRecipeGoalTags(r, calories, userGoal)
@@ -417,15 +430,22 @@ class FoodStore {
   }
 
   addRecipe(recipe) {
+    // store 层防御性校验
+    const safeName = sanitizeString(recipe.name || '', 30)
+    if (!safeName) return null  // 名称为空拒绝创建
     const r = {
       id: genId(),
-      name: recipe.name.trim(),
-      category: recipe.category || '其他',
-      emoji: recipe.emoji || '🍳',
-      difficulty: recipe.difficulty || '简单',
-      time: parseInt(recipe.time) || 15,
-      ingredients: recipe.ingredients.filter(i => i.trim()).map(i => i.trim()),
-      steps: recipe.steps.filter(s => s.trim()).map(s => s.trim()),
+      name: safeName,
+      category: validateEnum(recipe.category, VALID_RECIPE_CATEGORIES, '其他'),
+      emoji: sanitizeString(recipe.emoji || '🍳', 8) || '🍳',
+      difficulty: validateEnum(recipe.difficulty, VALID_DIFFICULTIES, '简单'),
+      time: validateNumber(recipe.time, 1, 999, 15),
+      ingredients: Array.isArray(recipe.ingredients)
+        ? recipe.ingredients.map(i => sanitizeString(i, 20)).filter(Boolean).slice(0, 30)
+        : [],
+      steps: Array.isArray(recipe.steps)
+        ? recipe.steps.map(s => sanitizeString(s, 200)).filter(Boolean).slice(0, 30)
+        : [],
     }
     this.state.recipes.unshift(r)
     this.saveRecipes()
@@ -474,7 +494,14 @@ class FoodStore {
 
   saveUser(user) {
     try {
-      this.state.user = { ...DEFAULT_USER, ...user }
+      // store 层防御性校验：所有字段经白名单/数值校验
+      this.state.user = {
+        nickname: sanitizeString(user.nickname || '', 20),
+        height: validateNumber(user.height, 50, 300, 0),
+        weight: validateNumber(user.weight, 10, 500, 0),
+        age: validateNumber(user.age, 1, 150, 0),
+        goal: validateEnum(user.goal, GOAL_OPTIONS, '均衡饮食'),
+      }
       localStorage.setItem(USER_KEY, JSON.stringify(this.state.user))
     } catch (e) {
       console.error('[FFood] 用户资料保存失败:', e)
@@ -485,7 +512,15 @@ class FoodStore {
     try {
       const raw = localStorage.getItem(USER_KEY)
       if (raw) {
-        this.state.user = { ...DEFAULT_USER, ...JSON.parse(raw) }
+        const parsed = JSON.parse(raw)
+        // 加载时也走校验，防御 localStorage 被脏数据污染
+        this.state.user = {
+          nickname: sanitizeString(parsed.nickname || '', 20),
+          height: validateNumber(parsed.height, 50, 300, 0),
+          weight: validateNumber(parsed.weight, 10, 500, 0),
+          age: validateNumber(parsed.age, 1, 150, 0),
+          goal: validateEnum(parsed.goal, GOAL_OPTIONS, '均衡饮食'),
+        }
       }
     } catch (e) {
       console.error('[FFood] 用户资料加载失败:', e)
@@ -569,6 +604,20 @@ export function useFoodStore() {
 
 // ==================== 校验函数 ====================
 
+// ==================== 白名单常量（用于 store 层校验） ====================
+
+export const VALID_CATEGORIES = ['蔬菜', '水果', '肉类', '乳制品', '调料', '主食', '其他']
+export const VALID_STORAGES = ['冷藏', '冷冻', '常温']
+export const VALID_UNITS = ['个', 'kg', '份', '斤', '公斤', '克', 'g', '磅', '两', '毫升', 'ml', '升', 'L']
+export const VALID_DIFFICULTIES = ['超简单', '简单', '中等', '困难']
+export const VALID_RECIPE_CATEGORIES = ['蔬菜', '肉类', '水果', '乳制品', '其他']
+
+/** 通用字符串清洗：trim + 截断 + 移除控制字符 */
+function sanitizeString(str, maxLen = 50) {
+  if (typeof str !== 'string') return ''
+  return str.replace(/[\u0000-\u001F\u007F]/g, '').trim().slice(0, maxLen)
+}
+
 export function validateFoodName(name) {
   if (!name || !name.trim()) {
     return { valid: false, message: '名称不能为空' }
@@ -577,23 +626,36 @@ export function validateFoodName(name) {
   if (trimmed.length > 20) {
     return { valid: false, message: '名称不能超过20个字符' }
   }
-  // 仅允许：汉字(\u4e00-\u9fff)、字母(a-zA-Z)、数字(0-9)、空格
-  if (!/^[\u4e00-\u9fff\w\s]+$/.test(trimmed)) {
-    return { valid: false, message: '名称只能包含汉字、字母和数字' }
+  // 允许：汉字 / 日文假名 / 韩文 / 拉丁扩展 / 字母数字 / 空格 / 部分标点
+  // 拒绝：尖括号 < >（XSS防御）、反引号、反斜杠、SQL关键字不在此层防御（无后端）
+  if (!/^[\u4e00-\u9fff\u3040-\u30ff\uac00-\ud7afa-zA-ZÀ-ÿ0-9\s·\-]+$/.test(trimmed)) {
+    return { valid: false, message: '名称只能包含汉字、字母、数字、空格、·、-' }
   }
   return { valid: true, message: '' }
 }
 
 export function validateQuantity(val) {
   const v = parseFloat(val)
-  if (isNaN(v) || v < 0.1) return { valid: false, message: '不能小于 0.1' }
+  if (isNaN(v) || !isFinite(v) || v < 0.1) return { valid: false, message: '不能小于 0.1' }
   if (v > 99.9) return { valid: false, message: '不能超过 99.9' }
   return { valid: true, message: '' }
 }
 
 export function validateDays(val) {
   const v = parseFloat(val)
-  if (isNaN(v) || v < 0.1) return { valid: false, message: '天数不能小于 0.1 天' }
+  if (isNaN(v) || !isFinite(v) || v < 0.1) return { valid: false, message: '天数不能小于 0.1 天' }
   if (v > 99.9) return { valid: false, message: '天数不能超过 99.9 天' }
   return { valid: true, message: '' }
+}
+
+/** 校验枚举字段，非法值回退到默认 */
+function validateEnum(val, validList, defaultVal) {
+  return validList.includes(val) ? val : defaultVal
+}
+
+/** 校验数字字段，非法值回退到默认 */
+function validateNumber(val, min, max, defaultVal) {
+  const v = parseFloat(val)
+  if (isNaN(v) || !isFinite(v)) return defaultVal
+  return Math.min(max, Math.max(min, v))
 }
