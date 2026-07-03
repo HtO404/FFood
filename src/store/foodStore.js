@@ -2,6 +2,7 @@ import { reactive } from 'vue'
 
 const STORAGE_KEY = 'ffood_data'
 const TEMPLATES_KEY = 'ffood_templates'
+const SHOPLIST_KEY = 'ffood_shoplist'
 const MAX_TEMPLATES = 20
 
 class FoodStore {
@@ -9,6 +10,7 @@ class FoodStore {
     this.state = reactive({
       foods: [],
       templates: [],
+      shopList: [],
     })
   }
 
@@ -175,6 +177,67 @@ class FoodStore {
     } catch (e) {
       console.error('[FFood] 模板加载失败:', e)
       this.state.templates = []
+    }
+  }
+
+  // ==================== 购物清单 ====================
+
+  get shopList() { return this.state.shopList }
+
+  getShopListSorted() {
+    return [...this.state.shopList].sort((a, b) => {
+      if (a.checked !== b.checked) return a.checked ? 1 : -1
+      return b.createdAt - a.createdAt
+    })
+  }
+
+  addShopItem(text) {
+    if (!text || !text.trim()) return
+    const item = {
+      id: genId(),
+      text: text.trim(),
+      checked: false,
+      createdAt: Date.now(),
+    }
+    this.state.shopList.push(item)
+    this.saveShopList()
+  }
+
+  toggleShopItem(id) {
+    const item = this.state.shopList.find(i => i.id === id)
+    if (item) {
+      item.checked = !item.checked
+      this.saveShopList()
+    }
+  }
+
+  removeShopItem(id) {
+    this.state.shopList = this.state.shopList.filter(i => i.id !== id)
+    this.saveShopList()
+  }
+
+  clearCheckedShopItems() {
+    this.state.shopList = this.state.shopList.filter(i => !i.checked)
+    this.saveShopList()
+  }
+
+  saveShopList() {
+    try {
+      localStorage.setItem(SHOPLIST_KEY, JSON.stringify(this.state.shopList))
+    } catch (e) {
+      console.error('[FFood] 购物清单保存失败:', e)
+    }
+  }
+
+  loadShopList() {
+    try {
+      const raw = localStorage.getItem(SHOPLIST_KEY)
+      if (raw) {
+        this.state.shopList = JSON.parse(raw)
+      }
+    } catch (e) {
+      console.error('[FFood] 购物清单加载失败:', e)
+      this.state.shopList = []
     }
   }
 }

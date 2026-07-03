@@ -1155,16 +1155,212 @@ select.form-input {
   transition: width 0.4s ease;
 }
 
-/* ===== 响应式 ===== */
-@media (max-width: 480px) {
-  .app {
-    padding: 0 var(--spacing-sm) 100px;
-  }
+/* ===== TabBar 底部导航 (P2-1) ===== */
+.tab-bar {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(480px, 100vw);
+  display: flex;
+  background: var(--bg-elevated);
+  backdrop-filter: var(--blur-bg);
+  -webkit-backdrop-filter: var(--blur-bg);
+  border-top: 0.5px solid rgba(142, 142, 147, 0.15);
+  padding: 4px 0 max(4px, env(safe-area-inset-bottom));
+  z-index: 250;
 }
 
-@media (min-width: 481px) {
-  .modal-sheet {
-    border-radius: var(--radius-xl);
-    margin-bottom: var(--spacing-lg);
-  }
+.tab-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 0 2px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  gap: 2px;
+  position: relative;
+  transition: opacity 0.15s;
 }
+
+.tab-icon {
+  font-size: 22px;
+}
+
+.tab-label {
+  font-size: 10px;
+  color: var(--text-tertiary);
+  font-weight: 500;
+}
+
+.tab-item.active .tab-label {
+  color: var(--blue);
+}
+
+.tab-badge {
+  position: absolute;
+  top: 2px;
+  right: calc(50% - 28px);
+  min-width: 18px;
+  height: 18px;
+  border-radius: 9px;
+  padding: 0 5px;
+  background: var(--red);
+  color: var(--text-inverse);
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+/* ===== 购物清单样式 (P2-1) ===== */
+.shop-list {
+  padding-bottom: 80px;
+}
+
+.shop-input-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: var(--spacing-md);
+}
+
+.shop-input {
+  flex: 1;
+  height: 44px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--bg-secondary);
+  backdrop-filter: var(--blur-card);
+  -webkit-backdrop-filter: var(--blur-card);
+  padding: 0 14px;
+  font-size: var(--font-callout);
+  color: var(--text-primary);
+}
+
+.shop-input::placeholder { color: var(--text-tertiary); }
+
+.shop-input:focus { background: var(--bg-elevated); box-shadow: inset 0 0 0 2px var(--blue); }
+
+.shop-add-btn {
+  height: 44px;
+  padding: 0 20px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--blue);
+  color: var(--text-inverse);
+  font-size: var(--font-callout);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.shop-add-btn:active { background: #0066d6; }
+.shop-add-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+.shop-section {
+  margin-bottom: var(--spacing-lg);
+}
+
+.shop-section-title {
+  font-size: var(--font-footnote);
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-xs);
+  padding-left: 4px;
+}
+
+.shop-section-title.dim {
+  color: var(--text-tertiary);
+  font-weight: 500;
+}
+
+.shop-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  margin-bottom: 4px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-card);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.shop-item:active { background: rgba(0, 122, 255, 0.06); }
+
+.shop-item.checked {
+  background: var(--bg-secondary);
+  opacity: 0.65;
+}
+
+.shop-item.checked .shop-item-text {
+  text-decoration: line-through;
+  color: var(--text-tertiary);
+}
+
+.shop-check {
+  width: 22px;
+  height: 22px;
+  border-radius: 11px;
+  border: 2px solid rgba(142, 142, 147, 0.3);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: var(--text-inverse);
+  transition: all 0.2s;
+}
+
+.shop-check.checked {
+  background: var(--green);
+  border-color: var(--green);
+}
+
+.shop-item-text {
+  flex: 1;
+  font-size: var(--font-callout);
+  color: var(--text-primary);
+}
+
+.shop-item-del {
+  width: 26px;
+  height: 26px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(142, 142, 147, 0.1);
+  color: var(--text-secondary);
+  font-size: 12px;
+  cursor: pointer;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}
+
+.shop-item-del:active { background: rgba(255, 59, 48, 0.15); color: var(--red); }
+
+.shop-clear-btn {
+  display: block;
+  width: 100%;
+  margin-top: 8px;
+  padding: 8px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--red);
+  font-size: var(--font-footnote);
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.shop-clear-btn:active { background: rgba(255, 59, 48, 0.08); }
+
+/* ===== 响应式 ===== */
