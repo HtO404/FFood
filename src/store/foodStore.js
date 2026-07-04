@@ -100,11 +100,43 @@ export const CALORIE_TABLE = {
   '咖喱': 325, '花椒': 316, '八角': 331, '桂皮': 247, '香叶': 311, '孜然': 375,
 }
 
+// 常见食材宏量营养素（每 100g）：碳水/蛋白质/脂肪（g）
+// 用于"营养概览"碳蛋脂比例可视化
+const MACRO_TABLE = {
+  '鸡蛋': { carbs: 1.1, protein: 13.3, fat: 8.8 },
+  '番茄': { carbs: 3.9, protein: 0.9, fat: 0.2 }, '西红柿': { carbs: 3.9, protein: 0.9, fat: 0.2 },
+  '猪肉': { carbs: 0, protein: 27, fat: 14 }, '五花肉': { carbs: 0, protein: 9, fat: 59 },
+  '牛肉': { carbs: 0, protein: 26, fat: 15 }, '牛腩': { carbs: 0, protein: 17, fat: 29 },
+  '鸡胸': { carbs: 0, protein: 31, fat: 3.6 }, '鸡腿': { carbs: 0, protein: 20, fat: 7 },
+  '鸡翅': { carbs: 0, protein: 19, fat: 11 },
+  '牛奶': { carbs: 3.4, protein: 3, fat: 3.2 }, '酸奶': { carbs: 9.3, protein: 2.5, fat: 2.7 },
+  '米饭': { carbs: 28, protein: 2.6, fat: 0.3 }, '面条': { carbs: 25, protein: 5, fat: 1.5 },
+  '馒头': { carbs: 47, protein: 7, fat: 1.1 }, '面包': { carbs: 50, protein: 8, fat: 4 },
+  '苹果': { carbs: 14, protein: 0.3, fat: 0.2 }, '香蕉': { carbs: 23, protein: 1.1, fat: 0.3 },
+  '橙子': { carbs: 11, protein: 0.7, fat: 0.2 }, '西瓜': { carbs: 6, protein: 0.6, fat: 0.1 },
+  '西兰花': { carbs: 4, protein: 2.8, fat: 0.4 }, '白菜': { carbs: 2.9, protein: 1, fat: 0.1 },
+  '黄瓜': { carbs: 3.6, protein: 0.7, fat: 0.1 }, '土豆': { carbs: 17, protein: 2, fat: 0.2 },
+  '胡萝卜': { carbs: 10, protein: 1, fat: 0.2 }, '洋葱': { carbs: 9, protein: 1.1, fat: 0.2 },
+  '茄子': { carbs: 5, protein: 1.1, fat: 0.2 }, '青椒': { carbs: 5, protein: 1, fat: 0.2 },
+  '豆腐': { carbs: 1.9, protein: 8, fat: 4.8 }, '草鱼': { carbs: 0, protein: 17, fat: 2.6 },
+  '虾': { carbs: 0.2, protein: 24, fat: 0.3 }, '排骨': { carbs: 0, protein: 23, fat: 20 },
+  '红薯': { carbs: 24, protein: 1.1, fat: 0.2 }, '玉米': { carbs: 22, protein: 4, fat: 1.2 },
+  '菠菜': { carbs: 2.8, protein: 2.6, fat: 0.3 }, '芹菜': { carbs: 3.5, protein: 1.2, fat: 0.2 },
+  '蘑菇': { carbs: 3.1, protein: 2.7, fat: 0.1 }, '生菜': { carbs: 2, protein: 1.4, fat: 0.15 },
+}
+
 function estimateIngredientCalories(name) {
   for (const key in CALORIE_TABLE) {
     if (name.includes(key) || key.includes(name)) return CALORIE_TABLE[key]
   }
   return 0
+}
+
+function estimateMacro(name) {
+  for (const key in MACRO_TABLE) {
+    if (name.includes(key) || key.includes(name)) return MACRO_TABLE[key]
+  }
+  return null
 }
 
 export function estimateRecipeCalories(recipe) {
@@ -535,16 +567,43 @@ class FoodStore {
     let proteinScore = 0
     let vegCount = 0
     let meatCount = 0
+    let totalCarbs = 0
+    let totalProtein = 0
+    let totalFat = 0
     for (const f of this.state.foods) {
+      const qty = parseFloat(f.quantity) || 1
       const cal = estimateIngredientCalories(f.name)
       if (cal > 0) {
-        totalCalories += cal * (parseFloat(f.quantity) || 1)
+        totalCalories += cal * qty
+      }
+      const macro = estimateMacro(f.name)
+      if (macro) {
+        totalCarbs += macro.carbs * qty
+        totalProtein += macro.protein * qty
+        totalFat += macro.fat * qty
       }
       if (['蔬菜', '水果'].includes(f.category)) vegCount++
       if (f.category === '肉类' || ['鸡', '牛', '羊', '鱼', '虾', '肉', '排骨'].some(k => f.name.includes(k))) meatCount++
       if (['鸡胸', '牛肉', '鸡蛋', '虾', '鱼', '豆腐', '牛奶', '鸡腿', '瘦肉', '三文鱼'].some(k => f.name.includes(k))) proteinScore += 1
     }
-    return { totalCalories: Math.round(totalCalories), vegCount, meatCount, proteinScore }
+    // 宏量营养素比例（按热量贡献：碳水4kcal/g、蛋白4kcal/g、脂肪9kcal/g）
+    const carbsKcal = totalCarbs * 4
+    const proteinKcal = totalProtein * 4
+    const fatKcal = totalFat * 9
+    const macroTotal = carbsKcal + proteinKcal + fatKcal
+    const macroRatio = macroTotal > 0 ? {
+      carbs: Math.round((carbsKcal / macroTotal) * 100),
+      protein: Math.round((proteinKcal / macroTotal) * 100),
+      fat: Math.round((fatKcal / macroTotal) * 100),
+    } : { carbs: 0, protein: 0, fat: 0 }
+    return {
+      totalCalories: Math.round(totalCalories),
+      vegCount, meatCount, proteinScore,
+      carbs: Math.round(totalCarbs),
+      protein: Math.round(totalProtein),
+      fat: Math.round(totalFat),
+      macroRatio,
+    }
   }
 
   // ==================== 条形码 (P2-3) ====================

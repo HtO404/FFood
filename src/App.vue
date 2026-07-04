@@ -220,7 +220,7 @@
         <div class="empty-hint">添加更多常用食材，或点击下方 + 自定义菜谱</div>
       </div>
 
-      <div class="recipe-item-wrapper" v-for="r in filteredRecipes" :key="r.id"
+      <div class="recipe-item-wrapper" v-for="r in filteredRecipes" :key="r.id" :data-recipe-id="r.id"
         @touchstart="recipeBatch.touchStart($event, r)" @touchmove="recipeBatch.touchMove($event, r, '.recipe-item-card')" @touchend="recipeBatch.touchEnd($event, r, '.recipe-item-card')"
         @mousedown="recipeBatch.mouseStart($event, r)" @mouseup="recipeBatch.mouseEnd($event, r)" @mouseleave="recipeBatch.mouseLeave(r)"
         @contextmenu.prevent>
@@ -344,6 +344,43 @@
             <div class="nutrition-label">高蛋白食材</div>
           </div>
         </div>
+        <div class="macro-section" v-if="nutritionSummary.macroRatio && (nutritionSummary.macroRatio.carbs + nutritionSummary.macroRatio.protein + nutritionSummary.macroRatio.fat) > 0">
+          <div class="macro-title">宏量营养素比例（按热量贡献）</div>
+          <div class="macro-ring-row">
+            <div class="macro-ring" :style="macroRingStyle">
+              <div class="macro-ring-center">
+                <span class="macro-ring-total">{{ nutritionSummary.totalCalories }}</span>
+                <span class="macro-ring-unit">kcal</span>
+              </div>
+            </div>
+            <div class="macro-legend">
+              <div class="macro-legend-item">
+                <span class="macro-dot macro-dot-carbs"></span>
+                <span class="macro-name">碳水</span>
+                <span class="macro-grams">{{ nutritionSummary.carbs }}g</span>
+                <span class="macro-pct">{{ nutritionSummary.macroRatio.carbs }}%</span>
+              </div>
+              <div class="macro-legend-item">
+                <span class="macro-dot macro-dot-protein"></span>
+                <span class="macro-name">蛋白质</span>
+                <span class="macro-grams">{{ nutritionSummary.protein }}g</span>
+                <span class="macro-pct">{{ nutritionSummary.macroRatio.protein }}%</span>
+              </div>
+              <div class="macro-legend-item">
+                <span class="macro-dot macro-dot-fat"></span>
+                <span class="macro-name">脂肪</span>
+                <span class="macro-grams">{{ nutritionSummary.fat }}g</span>
+                <span class="macro-pct">{{ nutritionSummary.macroRatio.fat }}%</span>
+              </div>
+            </div>
+          </div>
+          <div class="macro-bar">
+            <div class="macro-bar-carbs" :style="{ width: nutritionSummary.macroRatio.carbs + '%' }"></div>
+            <div class="macro-bar-protein" :style="{ width: nutritionSummary.macroRatio.protein + '%' }"></div>
+            <div class="macro-bar-fat" :style="{ width: nutritionSummary.macroRatio.fat + '%' }"></div>
+          </div>
+        </div>
+        <div class="macro-empty" v-else>暂无宏量营养素数据，添加常见食材后自动计算</div>
       </div>
 
       <div class="profile-card">
@@ -353,16 +390,15 @@
           <div class="wte-result" v-if="randomRecipe">{{ randomRecipe.emoji }} {{ randomRecipe.name }}</div>
           <div class="wte-hint" v-else>点我随机选一道菜谱</div>
         </div>
-        <button class="btn-save wte-btn" @click="pickRandomRecipe">摇一摇</button>
+        <div class="wte-actions" v-if="randomRecipe">
+          <button class="btn-save wte-btn" @click="pickRandomRecipe">再摇一次</button>
+          <button class="btn-save wte-cook-btn" @click="goToCook(randomRecipe)">🍳 去制作</button>
+        </div>
+        <button class="btn-save wte-btn wte-btn-full" v-else @click="pickRandomRecipe">摇一摇</button>
       </div>
     </div>
 
-    <!-- FAB：全 Tab 统一显示（profile 无添加语义，不显示；多选模式下隐藏避免误触） -->
-    <button v-if="activeTab === 'food' && !foodBatch.batchMode.value" class="fab" @click="openAddModal">+</button>
-    <button v-else-if="activeTab === 'recipes' && !recipeBatch.batchMode.value" class="fab fab-recipe" @click="openRecipeModal">+</button>
-    <button v-else-if="activeTab === 'shop' && !shopBatch.batchMode.value" class="fab fab-shop" @click="focusShopInput">+</button>
-
-    <!-- TabBar -->
+    <!-- TabBar：5格布局，中间居中放大添加按钮 -->
     <nav class="tab-bar">
       <button :class="['tab-item', { active: activeTab === 'food' }]" @click="switchTab('food')">
         <span class="tab-icon">🥬</span><span class="tab-label">食材</span>
@@ -370,8 +406,11 @@
       <button :class="['tab-item', { active: activeTab === 'recipes' }]" @click="switchTab('recipes')">
         <span class="tab-icon">🍳</span><span class="tab-label">菜谱</span>
       </button>
+      <button class="tab-item tab-center" @click="onCenterAdd">
+        <span class="tab-center-btn">+</span>
+      </button>
       <button :class="['tab-item', { active: activeTab === 'shop' }]" @click="switchTab('shop')">
-        <span class="tab-icon">🛒</span><span class="tab-label">购物清单</span>
+        <span class="tab-icon">🛒</span><span class="tab-label">购物</span>
         <span class="tab-badge" v-if="shopUncheckedCount">{{ shopUncheckedCount }}</span>
       </button>
       <button :class="['tab-item', { active: activeTab === 'profile' }]" @click="switchTab('profile')">
@@ -645,7 +684,7 @@
 </template>
 
 <script setup>
-import { ref, computed, reactive, onMounted, watch } from 'vue'
+import { ref, computed, reactive, onMounted, watch, nextTick } from 'vue'
 import { useFoodStore, validateFoodName, validateQuantity as checkQuantity, validateDays as checkDays, recommendDays, GOAL_OPTIONS } from './store/foodStore.js'
 import { useSwipeBatch } from './composables/useSwipeBatch.js'
 import { extractFood, extractRecipe } from './nlp/extractor.js'
@@ -695,6 +734,13 @@ const goalOptions = GOAL_OPTIONS
 const userForm = reactive({ ...foodStore.user })
 const randomRecipe = ref(null)
 const nutritionSummary = computed(() => foodStore.getNutritionSummary())
+const macroRingStyle = computed(() => {
+  const r = nutritionSummary.value.macroRatio
+  if (!r || r.carbs + r.protein + r.fat === 0) return {}
+  // conic-gradient 环形图：碳水(橙) 蛋白(蓝) 脂肪(红)
+  const c1 = r.carbs, c2 = c1 + r.protein
+  return { background: `conic-gradient(var(--orange) 0 ${c1}%, var(--blue) ${c1}% ${c2}%, var(--red) ${c2}% 100%)` }
+})
 function saveUserProfile() {
   foodStore.saveUser({ ...userForm })
 }
@@ -952,9 +998,22 @@ function addShopItem() {
   shopInput.value = ''
 }
 function focusShopInput() {
-  // FAB 在购物清单 tab：聚焦输入框（输入框在最顶部，无需弹窗）
+  // 购物清单 tab：聚焦输入框（输入框在最顶部，无需弹窗）
   const el = document.querySelector('.shop-input')
   if (el) { el.focus(); el.scrollIntoView({ behavior: 'smooth', block: 'start' }) }
+}
+
+// 导航栏中间添加按钮：根据当前 tab 触发对应添加操作
+function onCenterAdd() {
+  // 多选模式下不触发添加（避免误触）
+  if (foodBatch.batchMode.value || recipeBatch.batchMode.value || shopBatch.batchMode.value) return
+  switch (activeTab.value) {
+    case 'food': openAddModal(); break
+    case 'recipes': openRecipeModal(); break
+    case 'shop': focusShopInput(); break
+    case 'profile': switchTab('food'); nextTick(() => openAddModal()); break
+    default: openAddModal()
+  }
 }
 
 // ========== 菜谱 (P2-2) ==========
@@ -970,6 +1029,17 @@ function pickRandomRecipe() {
   const recipes = recommendedRecipes.value.length ? recommendedRecipes.value : foodStore.recipes
   if (recipes.length === 0) return
   randomRecipe.value = recipes[Math.floor(Math.random() * recipes.length)]
+}
+function goToCook(recipe) {
+  if (!recipe) return
+  switchTab('recipes')
+  // 展开目标菜谱详情（滚动到视图）
+  expandedRecipe.value = recipe.id
+  // 等待 DOM 更新后滚动到该菜谱
+  nextTick(() => {
+    const el = document.querySelector(`[data-recipe-id="${recipe.id}"]`)
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  })
 }
 watch(recommendedRecipes, () => {
   if (randomRecipe.value && !recommendedRecipes.value.some(r => r.id === randomRecipe.value.id)) {
