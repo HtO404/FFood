@@ -108,6 +108,295 @@ select:focus {
   outline: none;
 }
 
+/* ===== 登录/注册页 ===== */
+.auth-page {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(180deg, rgba(242, 242, 247, 0.95) 0%, rgba(255, 255, 255, 0.95) 100%);
+  padding: var(--spacing-lg) var(--spacing-md);
+}
+
+.auth-container {
+  width: 100%;
+  max-width: 360px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.auth-header {
+  text-align: center;
+  margin-bottom: var(--spacing-xl);
+}
+
+.auth-logo {
+  font-size: 64px;
+  margin-bottom: var(--spacing-sm);
+}
+
+.auth-title {
+  font-size: var(--font-large-title);
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  color: var(--text-primary);
+}
+
+.auth-subtitle {
+  font-size: var(--font-callout);
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+.auth-card {
+  width: 100%;
+  background: var(--bg-elevated);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  box-shadow: var(--shadow-md);
+}
+
+.auth-tabs {
+  display: flex;
+  background: rgba(142, 142, 147, 0.12);
+  border-radius: var(--radius-sm);
+  padding: 3px;
+  margin-bottom: var(--spacing-lg);
+}
+
+.auth-tab {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: 8px 0;
+  border-radius: 8px;
+  font-size: var(--font-subhead);
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.auth-tab.active {
+  background: var(--bg-elevated);
+  color: var(--blue);
+  box-shadow: var(--shadow-sm);
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.auth-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.auth-label {
+  font-size: var(--font-footnote);
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.auth-input {
+  width: 100%;
+  height: 44px;
+  border: 1px solid rgba(142, 142, 147, 0.2);
+  border-radius: var(--radius-sm);
+  padding: 0 14px;
+  font-size: var(--font-body);
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+  transition: border-color 0.2s;
+}
+
+.auth-input:focus {
+  border-color: var(--blue);
+}
+
+.password-row {
+  position: relative;
+}
+
+.password-row .auth-input {
+  padding-right: 44px;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: none;
+  background: transparent;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 4px 8px;
+}
+
+.auth-error {
+  font-size: var(--font-caption);
+  color: var(--red);
+  margin-top: 2px;
+}
+
+.auth-error-global {
+  background: rgba(255, 59, 48, 0.08);
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  margin-top: 4px;
+}
+
+.auth-submit {
+  height: 48px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--blue);
+  color: var(--text-inverse);
+  font-size: var(--font-body);
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: var(--spacing-sm);
+}
+
+.auth-submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.auth-loading {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-top-color: var(--text-inverse);
+  border-radius: 50%;
+  animation: auth-spin 0.6s linear infinite;
+}
+
+@keyframes auth-spin {
+  to { transform: rotate(360deg); }
+}
+
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin: var(--spacing-lg) 0;
+}
+
+.auth-divider-line {
+  flex: 1;
+  height: 0.5px;
+  background: rgba(142, 142, 147, 0.2);
+}
+
+.auth-divider-text {
+  font-size: var(--font-caption);
+  color: var(--text-tertiary);
+}
+
+.auth-wx-btn {
+  width: 100%;
+  height: 48px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--green);
+  color: var(--text-inverse);
+  font-size: var(--font-body);
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: opacity 0.2s;
+}
+
+.auth-wx-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.auth-wx-icon {
+  font-size: 20px;
+}
+
+.auth-mock-hint {
+  margin-top: var(--spacing-md);
+  padding: 10px 14px;
+  background: rgba(255, 149, 0, 0.1);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-caption);
+  color: var(--orange);
+  text-align: center;
+  line-height: 1.5;
+}
+
+.auth-guest {
+  margin-top: var(--spacing-lg);
+  border: none;
+  background: transparent;
+  color: var(--blue);
+  font-size: var(--font-subhead);
+  font-weight: 500;
+  cursor: pointer;
+  padding: 8px 16px;
+}
+
+/* ===== 登录状态行（我的 tab） ===== */
+.auth-status-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+}
+
+.auth-status-info {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  font-size: var(--font-subhead);
+  color: var(--text-primary);
+}
+
+.auth-status-icon {
+  font-size: 18px;
+}
+
+.btn-logout, .btn-login-go {
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 8px 16px;
+  font-size: var(--font-footnote);
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.btn-logout {
+  background: rgba(255, 59, 48, 0.1);
+  color: var(--red);
+}
+
+.btn-login-go {
+  background: var(--blue);
+  color: var(--text-inverse);
+}
+
+.btn-logout:active, .btn-login-go:active {
+  opacity: 0.7;
+}
+
 /* ===== App 容器 ===== */
 .app {
   max-width: 480px;

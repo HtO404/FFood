@@ -1,5 +1,9 @@
 <template>
-  <div class="app">
+  <!-- 未登录：显示登录/注册页 -->
+  <AuthPage v-if="!authStore.state.isLoggedIn && !guestMode" @guest="guestMode = true" @authed="guestMode = false" />
+
+  <!-- 已登录或游客模式：显示主应用 -->
+  <div class="app" v-else>
     <!-- ==================== 导航栏 ==================== -->
     <header class="nav-bar">
       <div class="nav-title">
@@ -396,6 +400,24 @@
         </div>
         <button class="btn-save wte-btn wte-btn-full" v-else @click="pickRandomRecipe">摇一摇</button>
       </div>
+
+      <!-- 登录状态 + 退出登录 -->
+      <div class="profile-card">
+        <div class="auth-status-row" v-if="authStore.state.isLoggedIn">
+          <div class="auth-status-info">
+            <span class="auth-status-icon">✅</span>
+            <span>已登录：{{ authStore.state.user?.nickname || authStore.state.user?.username }}</span>
+          </div>
+          <button class="btn-logout" @click="onLogout">退出登录</button>
+        </div>
+        <div class="auth-status-row" v-else>
+          <div class="auth-status-info">
+            <span class="auth-status-icon">👻</span>
+            <span>游客模式</span>
+          </div>
+          <button class="btn-login-go" @click="guestMode = false">去登录</button>
+        </div>
+      </div>
     </div>
 
     <!-- TabBar：5格布局，中间居中放大添加按钮 -->
@@ -688,6 +710,8 @@ import { ref, computed, reactive, onMounted, watch, nextTick } from 'vue'
 import { useFoodStore, validateFoodName, validateQuantity as checkQuantity, validateDays as checkDays, recommendDays, GOAL_OPTIONS } from './store/foodStore.js'
 import { useSwipeBatch } from './composables/useSwipeBatch.js'
 import { extractFood, extractRecipe } from './nlp/extractor.js'
+import AuthPage from './components/AuthPage.vue'
+import { authStore } from './store/authStore.js'
 
 const foodStore = useFoodStore()
 
@@ -721,6 +745,7 @@ const todayStr = new Date().toISOString().slice(0, 10)
 
 // ========== Tab ==========
 const activeTab = ref('food')
+const guestMode = ref(false)  // 游客模式：未登录也可浏览
 function switchTab(tab) {
   activeTab.value = tab
   // 切换 tab 时退出所有批量模式，避免状态串台
@@ -1016,6 +1041,12 @@ function onCenterAdd() {
   }
 }
 
+// 退出登录
+function onLogout() {
+  authStore.logout()
+  guestMode.value = false
+}
+
 // ========== 菜谱 (P2-2) ==========
 const expandedRecipe = ref(null)
 const activeRecipeCategory = ref('all')
@@ -1103,5 +1134,8 @@ function checkExpiryNotification() {
 function requestNotification() { if ('Notification' in window && Notification.permission==='default') Notification.requestPermission().then(p=>{if(p==='granted') checkExpiryNotification()}) }
 function startNotificationTimer() { if (nt) clearInterval(nt); nt = setInterval(checkExpiryNotification, 1000*60*60*4) }
 
-onMounted(() => { foodStore.load(); foodStore.loadTemplates(); foodStore.loadShopList(); foodStore.loadRecipes(); foodStore.loadUser(); Object.assign(userForm, foodStore.user); requestNotification(); checkExpiryNotification(); startNotificationTimer() })
+onMounted(() => {
+  authStore.initAuth()
+  foodStore.load(); foodStore.loadTemplates(); foodStore.loadShopList(); foodStore.loadRecipes(); foodStore.loadUser(); Object.assign(userForm, foodStore.user); requestNotification(); checkExpiryNotification(); startNotificationTimer()
+})
 </script>

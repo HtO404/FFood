@@ -1,0 +1,10 @@
+{
+  "name": "sendSms",
+  "version": "1.0.0",
+  "description": "FFood 短信验证码发送云函数（含限流 + 图形验证码防护）",
+  "main": "index.js",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "wx-server-sdk": "~2.6.3"
+  }
+}

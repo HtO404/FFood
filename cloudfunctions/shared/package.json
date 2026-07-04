@@ -1,0 +1,12 @@
+{
+  "name": "shared",
+  "version": "1.0.0",
+  "description": "FFood 云函数共享工具模块（db/auth/rateLimit/response/captcha）",
+  "private": true,
+  "main": "index.js",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "wx-server-sdk": "~2.6.3"
+  },
+  "notes": "本目录不是独立云函数，作为共享代码被各云函数以 require('../shared/xxx') 引用。部署时需将本目录内容复制到各云函数子目录内（详见 cloudfunctions/README.md 部署说明）。"
+}

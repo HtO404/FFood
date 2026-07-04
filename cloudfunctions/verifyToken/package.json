@@ -1,0 +1,10 @@
+{
+  "name": "verifyToken",
+  "version": "1.0.0",
+  "description": "FFood token 校验云函数（HMAC-SHA256）",
+  "main": "index.js",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "wx-server-sdk": "~2.6.3"
+  }
+}

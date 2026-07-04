@@ -1,0 +1,10 @@
+{
+  "name": "wxLogin",
+  "version": "1.0.0",
+  "description": "FFood 微信登录云函数（小程序专用，code2session 换 openid）",
+  "main": "index.js",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "wx-server-sdk": "~2.6.3"
+  }
+}

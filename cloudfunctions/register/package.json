@@ -1,0 +1,10 @@
+{
+  "name": "register",
+  "version": "1.0.0",
+  "description": "FFood 注册云函数（账号密码）",
+  "main": "index.js",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "wx-server-sdk": "~2.6.3"
+  }
+}

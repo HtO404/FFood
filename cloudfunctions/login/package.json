@@ -1,0 +1,10 @@
+{
+  "name": "login",
+  "version": "1.0.0",
+  "description": "FFood 登录云函数（账号密码 + 失败锁定）",
+  "main": "index.js",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "wx-server-sdk": "~2.6.3"
+  }
+}
