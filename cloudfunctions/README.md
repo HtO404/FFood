@@ -19,6 +19,9 @@ cloudfunctions/
 ├── register/                          # 注册云函数（账号密码）
 │   ├── index.js
 │   └── package.json
+├── createCaptcha/                     # 图形验证码生成（返回 captchaId + code 供前端 canvas 渲染）
+│   ├── index.js
+│   └── package.json
 ├── login/                             # 登录云函数（账号密码 + 失败锁定）
 │   ├── index.js
 │   └── package.json
@@ -77,7 +80,7 @@ cloudfunctions/
 
 ```bash
 # PowerShell 示例
-foreach ($fn in 'register','login','wxLogin','verifyToken','sendSms') {
+foreach ($fn in 'register','createCaptcha','login','wxLogin','verifyToken','sendSms') {
   Copy-Item -Recurse -Force cloudfunctions\shared cloudfunctions\$fn\shared
 }
 ```
@@ -133,6 +136,7 @@ https://<env-id>.service.tcloudbasegateway.com/<function-name>
 例如：
 ```
 https://ffood-abc123.service.tcloudbasegateway.com/register
+https://ffood-abc123.service.tcloudbasegateway.com/createCaptcha
 https://ffood-abc123.service.tcloudbasegateway.com/login
 https://ffood-abc123.service.tcloudbasegateway.com/wxLogin
 https://ffood-abc123.service.tcloudbasegateway.com/verifyToken

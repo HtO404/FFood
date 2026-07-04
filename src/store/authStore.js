@@ -31,11 +31,11 @@ async function initAuth() {
   }
 }
 
-async function login(username, password) {
+async function login(username, password, captchaId, captchaCode) {
   state.loading = true
   state.error = ''
   try {
-    const res = await call('login', { username, password })
+    const res = await call('login', { username, password, captchaId, captchaCode })
     if (res.code === 0 && res.data?.token) {
       state.isLoggedIn = true
       state.user = res.data.user
@@ -53,14 +53,14 @@ async function login(username, password) {
   }
 }
 
-async function register(username, password) {
+async function register(username, password, captchaId, captchaCode) {
   state.loading = true
   state.error = ''
   try {
-    const res = await call('register', { username, password })
+    const res = await call('register', { username, password, captchaId, captchaCode })
     if (res.code === 0) {
-      // 注册成功后自动登录
-      return await login(username, password)
+      // 注册成功后自动登录（登录也需要验证码，复用同一个）
+      return await login(username, password, captchaId, captchaCode)
     }
     state.error = res.message || '注册失败'
     return { success: false, message: res.message }

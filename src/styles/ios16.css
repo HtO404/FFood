@@ -239,6 +239,55 @@ select:focus {
   padding: 4px 8px;
 }
 
+/* 图形验证码 */
+.captcha-row {
+  display: flex;
+  gap: var(--spacing-sm);
+  align-items: center;
+}
+
+.captcha-input {
+  flex: 1;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.captcha-box {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.captcha-canvas {
+  width: 120px;
+  height: 44px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(142, 142, 147, 0.2);
+  cursor: pointer;
+  display: block;
+}
+
+.captcha-refresh {
+  border: none;
+  background: transparent;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 4px 6px;
+  color: var(--blue);
+  transition: transform 0.2s;
+}
+
+.captcha-refresh:active {
+  transform: rotate(180deg);
+}
+
+.captcha-refresh:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
 .auth-error {
   font-size: var(--font-caption);
   color: var(--red);

@@ -12,8 +12,8 @@
       <div class="auth-card">
         <!-- 切换登录/注册 -->
         <div class="auth-tabs">
-          <button :class="['auth-tab', { active: mode === 'login' }]" @click="mode = 'login'">登录</button>
-          <button :class="['auth-tab', { active: mode === 'register' }]" @click="mode = 'register'">注册</button>
+          <button :class="['auth-tab', { active: mode === 'login' }]" @click="switchMode('login')">登录</button>
+          <button :class="['auth-tab', { active: mode === 'register' }]" @click="switchMode('register')">注册</button>
         </div>
 
         <!-- 表单 -->
@@ -65,6 +65,24 @@
             <div v-if="errors.confirmPassword" class="auth-error">{{ errors.confirmPassword }}</div>
           </div>
 
+          <!-- 图形验证码 -->
+          <div class="auth-field">
+            <label class="auth-label">图形验证码</label>
+            <div class="captcha-row">
+              <input
+                v-model="captchaCode"
+                type="text"
+                class="auth-input captcha-input"
+                placeholder="输入图中字符"
+                maxlength="4"
+                autocomplete="off"
+                @input="captchaCode = captchaCode.toUpperCase()"
+              />
+              <CaptchaCanvas ref="captchaRef" @update="onCaptchaUpdate" @error="onCaptchaError" />
+            </div>
+            <div v-if="captchaError" class="auth-error">{{ captchaError }}</div>
+          </div>
+
           <!-- 全局错误 -->
           <div v-if="authStore.state.error" class="auth-error auth-error-global">
             ⚠️ {{ authStore.state.error }}
@@ -105,6 +123,7 @@
 <script setup>
 import { ref, reactive, computed } from 'vue'
 import { authStore } from '../store/authStore.js'
+import CaptchaCanvas from './CaptchaCanvas.vue'
 
 const emit = defineEmits(['guest', 'authed'])
 
@@ -113,13 +132,35 @@ const username = ref('')
 const password = ref('')
 const confirmPassword = ref('')
 const showPassword = ref(false)
+const captchaCode = ref('')
+const captchaId = ref('')
+const captchaError = ref('')
+const captchaRef = ref(null)
 const errors = reactive({ username: '', password: '', confirmPassword: '' })
 
 const canSubmit = computed(() => {
   if (!username.value || !password.value) return false
   if (mode.value === 'register' && !confirmPassword.value) return false
+  if (!captchaCode.value || captchaCode.value.length !== 4) return false
   return !errors.username && !errors.password && !errors.confirmPassword
 })
+
+function onCaptchaUpdate({ captchaId: id, code }) {
+  captchaId.value = id
+  captchaError.value = ''
+}
+
+function onCaptchaError(msg) {
+  captchaError.value = msg
+}
+
+function switchMode(m) {
+  mode.value = m
+  // 切换模式时刷新验证码，清空验证码输入
+  captchaCode.value = ''
+  captchaError.value = ''
+  captchaRef.value?.refresh()
+}
 
 function validateUsername() {
   const v = username.value
@@ -155,12 +196,22 @@ async function onSubmit() {
   validatePassword()
   validateConfirmPassword()
   if (errors.username || errors.password || errors.confirmPassword) return
+  if (!captchaCode.value || captchaCode.value.length !== 4) {
+    captchaError.value = '请输入 4 位验证码'
+    return
+  }
 
   const res = mode.value === 'login'
-    ? await authStore.login(username.value, password.value)
-    : await authStore.register(username.value, password.value)
+    ? await authStore.login(username.value, password.value, captchaId.value, captchaCode.value)
+    : await authStore.register(username.value, password.value, captchaId.value, captchaCode.value)
 
-  if (res.success) emit('authed')
+  if (res.success) {
+    emit('authed')
+  } else {
+    // 登录/注册失败：刷新验证码，清空用户输入（验证码已用掉）
+    captchaCode.value = ''
+    captchaRef.value?.refresh()
+  }
 }
 
 async function onWxLogin() {

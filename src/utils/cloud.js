@@ -13,6 +13,7 @@ const CONFIG = {
   // 各云函数的 HTTP 路径
   FUNCTION_PATHS: {
     register: '/register',
+    createCaptcha: '/createCaptcha',
     login: '/login',
     wxLogin: '/wxLogin',
     verifyToken: '/verifyToken',
@@ -94,10 +95,22 @@ async function callMock(fnName, data = {}) {
   const users = getMockUsers()
 
   switch (fnName) {
+    case 'createCaptcha': {
+      // mock 图形验证码：本地生成（实际由 CaptchaCanvas 组件自己生成，这里只是占位）
+      const chars = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'
+      let code = ''
+      for (let i = 0; i < 4; i++) code += chars[Math.floor(Math.random() * chars.length)]
+      const captchaId = 'mock_cap_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6)
+      return { code: 0, message: 'ok', data: { captchaId, code } }
+    }
     case 'register': {
-      const { username, password } = data
+      const { username, password, captchaId, captchaCode } = data
       if (!username || !password) return { code: 10002, message: '用户名或密码不能为空', data: null }
       if (users.find(u => u.username === username)) return { code: 10003, message: '用户名已存在', data: null }
+      // mock 模式：验证码校验宽松（captchaId 以 mock_cap_ 开头即视为通过，方便测试）
+      if (captchaId && captchaCode && captchaId.startsWith('mock_cap_')) {
+        // 通过
+      }
       const user = {
         id: 'mock_' + Date.now().toString(36),
         username,
@@ -112,7 +125,11 @@ async function callMock(fnName, data = {}) {
       return { code: 0, message: '注册成功', data: { userId: user.id, username: user.username } }
     }
     case 'login': {
-      const { username, password } = data
+      const { username, password, captchaId, captchaCode } = data
+      // mock 模式：验证码宽松校验
+      if (captchaId && captchaCode && captchaId.startsWith('mock_cap_')) {
+        // 通过
+      }
       const user = users.find(u => u.username === username)
       if (!user || user.passwordHash !== mockHash(password)) {
         return { code: 10004, message: '用户名或密码错误', data: null }
