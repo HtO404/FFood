@@ -1,4 +1,5 @@
 import { reactive } from 'vue'
+import { foodApi, IS_ONLINE } from '../utils/api.js'
 
 const STORAGE_KEY = 'ffood_data'
 const TEMPLATES_KEY = 'ffood_templates'
@@ -327,7 +328,7 @@ class FoodStore {
 
   // ==================== 食材 CRUD ====================
 
-  addFood(item) {
+  async addFood(item) {
     // store 层防御性校验：即使绕过 UI 也能保证数据安全
     const nameCheck = validateFoodName(item.name)
     const safeName = nameCheck.valid ? item.name.trim() : '未命名食材'
@@ -349,12 +350,34 @@ class FoodStore {
       createdAt: new Date().toISOString(),
       daysLeft: calcDaysLeft(expiryDate),
     }
+
+    // 在线模式：先调 API，成功后更新本地状态
+    if (IS_ONLINE) {
+      try {
+        const res = await foodApi.create({
+          name: food.name,
+          category: food.category,
+          quantity: food.quantity,
+          unit: food.unit,
+          purchaseDate: food.purchaseDate,
+          expiryDate: food.expiryDate,
+          storage: food.storage,
+          days: food.days,
+        })
+        if (res.code === 0 && res.data) {
+          food.id = String(res.data.id || res.data.insertId || food.id)
+        }
+      } catch (e) {
+        console.warn('[foodStore] API 添加失败，仅存本地:', e)
+      }
+    }
+
     this.state.foods.push(food)
     this.save()
     this.saveTemplate(item)
   }
 
-  updateFood(id, data) {
+  async updateFood(id, data) {
     const idx = this.state.foods.findIndex(f => f.id === id)
     if (idx === -1) return
     const qty = clampFloat(data.quantity, 0.1, 99.9)
@@ -375,17 +398,42 @@ class FoodStore {
       storage: validateEnum(data.storage, VALID_STORAGES, this.state.foods[idx].storage || '冷藏'),
       daysLeft: calcDaysLeft(expiryDate),
     }
+
+    // 在线模式：调 API 更新
+    if (IS_ONLINE) {
+      try {
+        await foodApi.update(id, {
+          name: updated.name,
+          category: updated.category,
+          quantity: updated.quantity,
+          unit: updated.unit,
+          purchaseDate: updated.purchaseDate,
+          expiryDate: updated.expiryDate,
+          storage: updated.storage,
+          days: updated.days,
+        })
+      } catch (e) {
+        console.warn('[foodStore] API 更新失败，仅存本地:', e)
+      }
+    }
+
     this.state.foods[idx] = updated
     this.save()
   }
 
-  removeFood(id) {
+  async removeFood(id) {
+    if (IS_ONLINE) {
+      try { await foodApi.remove(id) } catch (e) { console.warn('[foodStore] API 删除失败:', e) }
+    }
     this.state.foods = this.state.foods.filter(f => f.id !== id)
     this.save()
   }
 
   /** 批量删除 */
-  removeFoods(ids) {
+  async removeFoods(ids) {
+    if (IS_ONLINE) {
+      try { await foodApi.batchDelete(ids) } catch (e) { console.warn('[foodStore] API 批量删除失败:', e) }
+    }
     const idSet = new Set(ids)
     this.state.foods = this.state.foods.filter(f => !idSet.has(f.id))
     this.save()
@@ -407,7 +455,27 @@ class FoodStore {
     }
   }
 
-  load() {
+  async load() {
+    // 在线模式：优先从后端加载
+    if (IS_ONLINE) {
+      try {
+        const res = await foodApi.list()
+        if (res.code === 0 && res.data) {
+          const list = Array.isArray(res.data) ? res.data : (res.data.list || [])
+          this.state.foods = list.map(f => ({
+            ...f,
+            id: String(f.id),
+            daysLeft: calcDaysLeft(f.expiryDate),
+          }))
+          this.save() // 同步到 localStorage 作为缓存
+          return
+        }
+      } catch (e) {
+        console.warn('[foodStore] API 加载失败，fallback 到 localStorage:', e)
+      }
+    }
+
+    // 离线模式或 API 失败：从 localStorage 加载
     try {
       const raw = localStorage.getItem(STORAGE_KEY)
       if (raw) {

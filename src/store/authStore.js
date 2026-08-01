@@ -1,6 +1,7 @@
-// 用户鉴权状态管理
+// 用户鉴权状态管理（双模式：REST API / 云函数+Mock）
 import { reactive } from 'vue'
 import { call, callAuth, tokenStore, IS_MOCK } from '../utils/cloud.js'
+import { authApi, IS_ONLINE } from '../utils/api.js'
 
 const state = reactive({
   isLoggedIn: false,
@@ -15,18 +16,48 @@ async function initAuth() {
   const token = tokenStore.get()
   if (!token) return
   state.token = token
+
+  // 在线模式：走 REST API
+  if (IS_ONLINE) {
+    try {
+      const res = await authApi.verify()
+      if (res.code === 0 && res.data?.user) {
+        state.isLoggedIn = true
+        state.user = res.data.user
+      } else {
+        // token 无效，尝试刷新
+        try {
+          const refreshRes = await authApi.refresh()
+          if (refreshRes.code === 0 && refreshRes.data?.token) {
+            tokenStore.set(refreshRes.data.token)
+            state.isLoggedIn = true
+            state.user = refreshRes.data.user
+            return
+          }
+        } catch (e) {
+          // 刷新也失败
+        }
+        tokenStore.clear()
+        state.token = null
+      }
+    } catch (e) {
+      // 网络错误不清理 token，保留登录态（下次重试）
+      console.warn('[authStore] API verifyToken 失败:', e)
+    }
+    return
+  }
+
+  // 离线模式：走云函数/mock
   try {
     const res = await call('verifyToken', { token })
     if (res.code === 0 && res.data?.user) {
       state.isLoggedIn = true
       state.user = res.data.user
     } else {
-      // token 无效，清理
       tokenStore.clear()
       state.token = null
     }
   } catch (e) {
-    // 网络错误不清理 token，保留登录态（下次重试）
     console.warn('[authStore] verifyToken 失败:', e)
   }
 }
@@ -35,7 +66,13 @@ async function login(username, password, captchaId, captchaCode) {
   state.loading = true
   state.error = ''
   try {
-    const res = await call('login', { username, password, captchaId, captchaCode })
+    let res
+    if (IS_ONLINE) {
+      res = await authApi.login(username, password, captchaId, captchaCode)
+    } else {
+      res = await call('login', { username, password, captchaId, captchaCode })
+    }
+
     if (res.code === 0 && res.data?.token) {
       state.isLoggedIn = true
       state.user = res.data.user
@@ -57,9 +94,15 @@ async function register(username, password, captchaId, captchaCode) {
   state.loading = true
   state.error = ''
   try {
-    const res = await call('register', { username, password, captchaId, captchaCode })
+    let res
+    if (IS_ONLINE) {
+      res = await authApi.register(username, password, captchaId, captchaCode)
+    } else {
+      res = await call('register', { username, password, captchaId, captchaCode })
+    }
+
     if (res.code === 0) {
-      // 注册成功后自动登录（登录也需要验证码，复用同一个）
+      // 注册成功后自动登录
       return await login(username, password, captchaId, captchaCode)
     }
     state.error = res.message || '注册失败'
@@ -76,14 +119,18 @@ async function wxLogin() {
   state.loading = true
   state.error = ''
   try {
-    // 小程序端：先 wx.login 拿 code
+    // 在线模式暂不支持微信登录，提示用户
+    if (IS_ONLINE) {
+      state.error = '在线模式暂不支持微信登录'
+      return { success: false, message: '在线模式暂不支持微信登录，请使用账号登录' }
+    }
+
     let code = ''
     if (typeof wx !== 'undefined' && wx.login) {
       code = await new Promise((resolve, reject) => {
         wx.login({ success: r => resolve(r.code), fail: reject })
       })
     }
-    // H5 mock 模式：code 为空，云函数走 mock 分支
     const res = await call('wxLogin', { code })
     if (res.code === 0 && res.data?.token) {
       state.isLoggedIn = true
@@ -117,7 +164,8 @@ export const authStore = {
   register,
   wxLogin,
   logout,
-  IS_MOCK
+  IS_MOCK,
+  IS_ONLINE
 }
 
 export default authStore

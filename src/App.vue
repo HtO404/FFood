@@ -427,13 +427,22 @@
       <div class="profile-card">
         <div class="profile-card-title">🔄 推荐品类·定期更换提醒</div>
         <div class="recommend-category-list">
-          <div v-for="item in recommendedCategories" :key="item.name" class="recommend-category-item">
+          <div v-for="item in recommendedCategoriesWithStatus" :key="item.name" class="recommend-category-item" :class="{ 'is-overdue': item.tracked && item.overdue, 'is-urgent': item.tracked && item.urgent }">
             <span class="recommend-category-emoji">{{ item.emoji }}</span>
             <div class="recommend-category-info">
               <div class="recommend-category-name">{{ item.name }}</div>
               <div class="recommend-category-desc">{{ item.desc }}</div>
+              <div v-if="item.tracked" class="recommend-category-status">
+                <span v-if="item.overdue" class="status-overdue">已逾期 {{ Math.abs(item.daysLeft) }} 天</span>
+                <span v-else-if="item.urgent" class="status-urgent">还有 {{ item.daysLeft }} 天到期</span>
+                <span v-else class="status-ok">追踪中 · 还有 {{ item.daysLeft }} 天</span>
+              </div>
             </div>
-            <div class="recommend-category-cycle">{{ item.cycle }}天</div>
+            <div class="recommend-category-right">
+              <div class="recommend-category-cycle">{{ item.cycle }}天</div>
+              <button v-if="!item.tracked" class="recommend-track-btn" @click="startTrackingCategory(item.name)">追踪</button>
+              <button v-else class="recommend-track-btn tracked" @click="resetCategoryTracking(item.name)">重置</button>
+            </div>
           </div>
         </div>
       </div>
@@ -767,7 +776,8 @@
 <script setup>
 import { ref, computed, reactive, onMounted, watch, nextTick } from 'vue'
 import { useFoodStore, validateFoodName, validateQuantity as checkQuantity, validateDays as checkDays, recommendDays, recommendDaysByName, GOAL_OPTIONS } from './store/foodStore.js'
-import { recommendShelfLife, getRecommendedCategories, HAS_DEEPSEEK_KEY } from './utils/deepseek.js'
+import { recommendShelfLife, HAS_DEEPSEEK_KEY } from './utils/deepseek.js'
+import { getRecommendedCategories, reminderService } from './utils/reminderService.js'
 import { useSwipeBatch } from './composables/useSwipeBatch.js'
 import { extractFood, extractRecipe } from './nlp/extractor.js'
 import AuthPage from './components/AuthPage.vue'
@@ -980,6 +990,23 @@ async function getAiRecommend() {
 
 // 推荐品类数据
 const recommendedCategories = getRecommendedCategories()
+
+// 推荐品类带追踪状态（用 ref 手动刷新）
+const recommendedCategoriesWithStatus = ref(reminderService.getAllCategoryStatus())
+
+function refreshCategoryStatus() {
+  recommendedCategoriesWithStatus.value = reminderService.getAllCategoryStatus()
+}
+
+function startTrackingCategory(name) {
+  reminderService.initCategoryItem(name, new Date().toISOString().slice(0, 10))
+  refreshCategoryStatus()
+}
+
+function resetCategoryTracking(name) {
+  reminderService.setCategoryStartDate(name, new Date().toISOString().slice(0, 10))
+  refreshCategoryStatus()
+}
 function recalcExpiry() {}
 function validateName() { const r = validateFoodName(form.value.name); errors.name = r.message; return r.valid }
 function validateQty() { const r = checkQuantity(form.value.quantity); errors.quantity = r.message; return r.valid }
@@ -1233,5 +1260,7 @@ function startNotificationTimer() { if (nt) clearInterval(nt); nt = setInterval(
 onMounted(() => {
   authStore.initAuth()
   foodStore.load(); foodStore.loadTemplates(); foodStore.loadShopList(); foodStore.loadRecipes(); foodStore.loadUser(); Object.assign(userForm, foodStore.user); requestNotification(); checkExpiryNotification(); startNotificationTimer()
+  // 推荐品类到期提醒检查
+  reminderService.checkAndNotify(foodStore.state.foods)
 })
 </script>
