@@ -424,6 +424,19 @@
         <div class="macro-empty" v-else>暂无宏量营养素数据，添加常见食材后自动计算</div>
       </div>
 
+      <div class="profile-card">
+        <div class="profile-card-title">🔄 推荐品类·定期更换提醒</div>
+        <div class="recommend-category-list">
+          <div v-for="item in recommendedCategories" :key="item.name" class="recommend-category-item">
+            <span class="recommend-category-emoji">{{ item.emoji }}</span>
+            <div class="recommend-category-info">
+              <div class="recommend-category-name">{{ item.name }}</div>
+              <div class="recommend-category-desc">{{ item.desc }}</div>
+            </div>
+            <div class="recommend-category-cycle">{{ item.cycle }}天</div>
+          </div>
+        </div>
+      </div>
       <div class="profile-card" v-if="featureStore.state.flags.recipes">
         <div class="profile-card-title">今天吃什么</div>
         <div class="what-to-eat" @click="pickRandomRecipe">
@@ -619,6 +632,15 @@
                 <button class="days-recommend-chip" @click="form.days = recommendedDays; validateDayField()">
                   {{ recommendedDays }} 天
                 </button>
+                <button class="days-recommend-chip ai-recommend-btn" @click="getAiRecommend" :disabled="aiRecommendLoading">
+                  {{ aiRecommendLoading ? '🤔 查询中…' : (HAS_DEEPSEEK_KEY ? '🤖 AI推荐' : '🤖 AI推荐') }}
+                </button>
+              </div>
+              <div class="ai-recommend-result" v-if="aiRecommendResult && !aiRecommendLoading">
+                <div class="ai-recommend-days">{{ aiRecommendResult.days }} 天</div>
+                <div class="ai-recommend-reason" v-if="aiRecommendResult.reason">{{ aiRecommendResult.reason }}</div>
+                <div class="ai-recommend-tips" v-if="aiRecommendResult.tips">💡 {{ aiRecommendResult.tips }}</div>
+                <div class="ai-recommend-source" v-if="aiRecommendResult.source === 'ai'">✨ 由 DeepSeek AI 生成</div>
               </div>
               <div class="expiry-preview" v-if="computedExpiry">📅 到期日：<strong>{{ computedExpiry }}</strong></div>
             </div>
@@ -744,7 +766,8 @@
 
 <script setup>
 import { ref, computed, reactive, onMounted, watch, nextTick } from 'vue'
-import { useFoodStore, validateFoodName, validateQuantity as checkQuantity, validateDays as checkDays, recommendDays, GOAL_OPTIONS } from './store/foodStore.js'
+import { useFoodStore, validateFoodName, validateQuantity as checkQuantity, validateDays as checkDays, recommendDays, recommendDaysByName, GOAL_OPTIONS } from './store/foodStore.js'
+import { recommendShelfLife, getRecommendedCategories, HAS_DEEPSEEK_KEY } from './utils/deepseek.js'
 import { useSwipeBatch } from './composables/useSwipeBatch.js'
 import { extractFood, extractRecipe } from './nlp/extractor.js'
 import AuthPage from './components/AuthPage.vue'
@@ -923,12 +946,40 @@ const computedExpiry = computed(() => {
   return isNaN(d.getTime()) ? '' : `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()}`
 })
 const recommendedDays = computed(() => recommendDays(form.value.category, form.value.storage))
+const aiRecommendLoading = ref(false)
+const aiRecommendResult = ref(null)
+
 watch([() => form.value.category, () => form.value.storage], () => {
   if (!editingFood.value && showAddModal.value) {
-    form.value.days = recommendDays(form.value.category, form.value.storage)
+    form.value.days = recommendDaysByName(form.value.name, form.value.category, form.value.storage)
     validateDayField()
   }
 })
+
+// AI 智能推荐保存天数（调用 DeepSeek API）
+async function getAiRecommend() {
+  if (!form.value.name.trim()) {
+    errors.name = '请先输入食材名称'
+    return
+  }
+  aiRecommendLoading.value = true
+  aiRecommendResult.value = null
+  try {
+    const result = await recommendShelfLife(form.value.name.trim(), form.value.category, form.value.storage)
+    aiRecommendResult.value = result
+    if (result.days) {
+      form.value.days = result.days
+      validateDayField()
+    }
+  } catch (e) {
+    console.warn('AI 推荐失败:', e)
+  } finally {
+    aiRecommendLoading.value = false
+  }
+}
+
+// 推荐品类数据
+const recommendedCategories = getRecommendedCategories()
 function recalcExpiry() {}
 function validateName() { const r = validateFoodName(form.value.name); errors.name = r.message; return r.valid }
 function validateQty() { const r = checkQuantity(form.value.quantity); errors.quantity = r.message; return r.valid }

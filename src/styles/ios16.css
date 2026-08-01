@@ -1303,6 +1303,94 @@ select.form-input {
   background: rgba(0, 122, 255, 0.18);
 }
 
+/* AI 推荐按钮 */
+.ai-recommend-btn {
+  background: rgba(175, 82, 222, 0.1);
+  color: #af52de;
+  margin-left: 6px;
+}
+.ai-recommend-btn:active {
+  background: rgba(175, 82, 222, 0.2);
+}
+.ai-recommend-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* AI 推荐结果卡片 */
+.ai-recommend-result {
+  margin-top: 8px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, rgba(175, 82, 222, 0.06), rgba(0, 122, 255, 0.04));
+  border: 1px solid rgba(175, 82, 222, 0.12);
+}
+.ai-recommend-days {
+  font-size: var(--font-body);
+  font-weight: 700;
+  color: #af52de;
+}
+.ai-recommend-reason {
+  font-size: var(--font-caption);
+  color: var(--secondary-label);
+  margin-top: 2px;
+}
+.ai-recommend-tips {
+  font-size: var(--font-caption);
+  color: var(--secondary-label);
+  margin-top: 4px;
+  line-height: 1.4;
+}
+.ai-recommend-source {
+  font-size: 11px;
+  color: rgba(175, 82, 222, 0.5);
+  margin-top: 4px;
+}
+
+/* 推荐品类列表 */
+.recommend-category-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 8px;
+}
+.recommend-category-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--separator);
+}
+.recommend-category-item:last-child {
+  border-bottom: none;
+}
+.recommend-category-emoji {
+  font-size: 24px;
+  flex-shrink: 0;
+}
+.recommend-category-info {
+  flex: 1;
+  min-width: 0;
+}
+.recommend-category-name {
+  font-size: var(--font-body);
+  font-weight: 600;
+}
+.recommend-category-desc {
+  font-size: var(--font-caption);
+  color: var(--secondary-label);
+  margin-top: 1px;
+}
+.recommend-category-cycle {
+  font-size: var(--font-footnote);
+  font-weight: 600;
+  color: var(--orange);
+  flex-shrink: 0;
+  padding: 2px 8px;
+  border-radius: 8px;
+  background: rgba(255, 149, 0, 0.08);
+}
+
 /* ===== 空状态更新 ===== */
 
 /* ===== 导航栏操作 ===== */
