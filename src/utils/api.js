@@ -74,7 +74,12 @@ export const foodApi = {
   },
 
   create: (data) =>
-    request('/foods', { method: 'POST', body: data }),
+    request('/foods', { method: 'POST', body: {
+      ...data,
+      // 同时发送 snake_case 版本，确保后端兼容
+      purchase_date: data.purchaseDate || data.purchase_date,
+      expiry_date: data.expiryDate || data.expiry_date,
+    } }),
 
   update: (id, data) =>
     request(`/foods/${id}`, { method: 'PUT', body: data }),

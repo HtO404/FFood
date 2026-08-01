@@ -14,6 +14,7 @@ const pool = mysql.createPool({
   queueLimit: 0,
   charset: 'utf8mb4',
   timezone: '+08:00',
+  dateStrings: true,  // 返回日期字符串而非 Date 对象，避免时区偏移
 });
 
 /** 测试数据库连接 */

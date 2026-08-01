@@ -62,6 +62,7 @@ CREATE TABLE IF NOT EXISTS food_templates (
   storage VARCHAR(20) DEFAULT '冷藏' COMMENT '储存方式',
   last_used TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '最后使用时间',
   INDEX idx_user_id (user_id),
+  UNIQUE INDEX uk_user_name (user_id, name),
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='食材模板表';
 

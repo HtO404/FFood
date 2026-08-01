@@ -44,10 +44,16 @@ async function list(req, res, next) {
 async function create(req, res, next) {
   try {
     const userId = req.user.id;
-    const {
-      name, category = '其他', quantity = 1.0, unit = '个',
-      purchase_date, expiry_date, storage = '冷藏', days = 7.0,
-    } = req.body;
+    const body = req.body;
+    // 兼容 camelCase 和 snake_case
+    const name = body.name;
+    const category = body.category || '其他';
+    const quantity = body.quantity ?? 1.0;
+    const unit = body.unit || '个';
+    const purchase_date = body.purchase_date || body.purchaseDate;
+    const expiry_date = body.expiry_date || body.expiryDate;
+    const storage = body.storage || '冷藏';
+    const days = body.days ?? 7.0;
 
     if (!name || !purchase_date || !expiry_date) {
       return res.status(400).json(fail('食材名称、购买日期、过期日期不能为空', 400));
@@ -83,18 +89,23 @@ async function update(req, res, next) {
   try {
     const userId = req.user.id;
     const foodId = req.params.id;
-    const fields = [
-      'name', 'category', 'quantity', 'unit',
-      'purchase_date', 'expiry_date', 'storage', 'days',
-    ];
+    // 兼容 camelCase 和 snake_case
+    const fieldMap = {
+      'name': 'name', 'category': 'category', 'quantity': 'quantity', 'unit': 'unit',
+      'purchase_date': 'purchase_date', 'purchaseDate': 'purchase_date',
+      'expiry_date': 'expiry_date', 'expiryDate': 'expiry_date',
+      'storage': 'storage', 'days': 'days',
+    };
 
-    // 收集要更新的字段
+    // 收集要更新的字段（去重）
     const updates = [];
     const values = [];
-    for (const f of fields) {
-      if (req.body[f] !== undefined) {
-        updates.push(`${f} = ?`);
-        values.push(req.body[f]);
+    const seenFields = new Set();
+    for (const [bodyKey, dbField] of Object.entries(fieldMap)) {
+      if (req.body[bodyKey] !== undefined && !seenFields.has(dbField)) {
+        seenFields.add(dbField);
+        updates.push(`${dbField} = ?`);
+        values.push(req.body[bodyKey]);
       }
     }
 
