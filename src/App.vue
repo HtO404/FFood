@@ -198,14 +198,24 @@
 
     <!-- ==================== 菜谱推荐 Tab (P2-2) ==================== -->
     <div class="recipe-list" v-if="activeTab === 'recipes'">
+      <!-- 菜谱推荐功能未开启：锁定占位 -->
+      <div v-if="!featureStore.state.flags.recipes" class="feature-locked">
+        <div class="feature-locked-icon">🔒</div>
+        <div class="feature-locked-title">菜谱推荐未开启</div>
+        <div class="feature-locked-desc">开启后可查看菜谱库、自定义菜谱和「今天吃什么」</div>
+        <button class="btn-save feature-locked-btn" @click="featureStore.toggle('recipes')">去开启</button>
+      </div>
+
+      <template v-else>
       <div class="recipe-header-bar">
         <div class="recipe-hint" v-if="recipeBatch.batchMode.value">
           🔒 内置菜谱不可删除，仅可勾选自定义菜谱
         </div>
-        <div class="recipe-hint" v-else-if="foodStore.totalCount > 0">
-          🧑‍🍳 基于冰箱里的 <strong>{{ foodStore.totalCount }}</strong> 件食材自动同步，猜你喜欢：
+        <div class="recipe-hint" v-else-if="featureStore.state.flags.pairing && foodStore.totalCount > 0">
+          🧊 基于冰箱里的 <strong>{{ foodStore.totalCount }}</strong> 件食材自动同步，猜你喜欢：
         </div>
-        <div class="recipe-hint" v-else>🧑‍🍳 冰箱还是空的，先添加食材才能匹配菜谱哦～</div>
+        <div class="recipe-hint" v-else-if="featureStore.state.flags.pairing">🧑‍🍳 冰箱还是空的，先添加食材才能匹配菜谱哦～</div>
+        <div class="recipe-hint" v-else>📖 菜谱库浏览模式，共 {{ foodStore.recipes.length }} 道菜谱</div>
         <button v-if="recommendedRecipes.length > 0" :class="['batch-toggle-btn', { active: recipeBatch.batchMode.value }]" @click="recipeBatch.toggleBatchMode()">
           {{ recipeBatch.batchMode.value ? '完成' : '多选' }}
         </button>
@@ -246,15 +256,15 @@
             <div class="recipe-info">
               <div class="recipe-name">{{ r.name }}</div>
               <div class="recipe-meta">{{ r.difficulty }} · ⏱ {{ r.time }}分钟 · 🔥 {{ r.calories }} kcal</div>
-              <div class="recipe-goal-tags" v-if="r.goalTags.length">
+              <div class="recipe-goal-tags" v-if="featureStore.state.flags.pairing && r.goalTags.length">
                 <span v-for="tag in r.goalTags" :key="tag" class="goal-tag">{{ tag }}</span>
               </div>
             </div>
-            <div :class="['recipe-match-badge', r.ratio >= 1 ? 'match-full' : r.ratio > 0 ? 'match-high' : 'match-none']">
+            <div v-if="featureStore.state.flags.pairing" :class="['recipe-match-badge', r.ratio >= 1 ? 'match-full' : r.ratio > 0 ? 'match-high' : 'match-none']">
               {{ r.ratio >= 1 ? '✅ 全部齐备' : r.ratio > 0 ? `缺${r.unmatched.length}种` : '未匹配' }}
             </div>
           </div>
-          <div class="recipe-ingredients-preview">
+          <div class="recipe-ingredients-preview" v-if="featureStore.state.flags.pairing">
             <span v-for="ing in r.ingredients" :key="ing"
               :class="['ingredient-tag', r.matched.includes(ing) ? 'ingredient-have' : 'ingredient-miss']">
               {{ r.matched.includes(ing) ? '✅' : '❌' }} {{ ing }}
@@ -262,13 +272,19 @@
           </div>
           <Transition name="expand">
             <div v-if="expandedRecipe === r.id" class="recipe-body">
-              <div class="recipe-section">
+              <div class="recipe-section" v-if="featureStore.state.flags.pairing">
                 <div class="recipe-section-title">所需食材</div>
                 <div class="recipe-ingredients">
                   <span v-for="ing in r.ingredients" :key="ing"
                     :class="['ingredient-tag', r.matched.includes(ing) ? 'ingredient-have' : 'ingredient-miss']">
                     {{ r.matched.includes(ing) ? '✅' : '❌' }} {{ ing }}
                   </span>
+                </div>
+              </div>
+              <div class="recipe-section" v-else>
+                <div class="recipe-section-title">所需食材</div>
+                <div class="recipe-ingredients">
+                  <span v-for="ing in r.ingredients" :key="ing" class="ingredient-tag ingredient-have">🧺 {{ ing }}</span>
                 </div>
               </div>
               <div class="recipe-section">
@@ -287,6 +303,7 @@
           </Transition>
         </div>
       </div>
+      </template>
     </div>
 
     <!-- ==================== 我的 Tab ==================== -->
@@ -305,6 +322,7 @@
           <label class="form-label">昵称</label>
           <input v-model="userForm.nickname" class="form-input" placeholder="怎么称呼你" maxlength="12" />
         </div>
+        <template v-if="featureStore.state.flags.fitness">
         <div class="form-row">
           <div class="form-group flex-1">
             <label class="form-label">身高（cm）</label>
@@ -325,10 +343,29 @@
             <button v-for="g in goalOptions" :key="g" :class="['goal-chip', { active: userForm.goal === g }]" @click="userForm.goal = g">{{ g }}</button>
           </div>
         </div>
+        </template>
+        <div v-else class="feature-mini-locked">💪 健身指标未开启，去下方「功能设置」打开后可填写身高/体重/健康目标</div>
         <button class="btn-save profile-save" @click="saveUserProfile">保存资料</button>
       </div>
 
+      <!-- 功能设置卡片 -->
       <div class="profile-card">
+        <div class="profile-card-title">功能设置</div>
+        <div class="feature-switch-list">
+          <div class="feature-switch-item" v-for="def in featureStore.defs" :key="def.key">
+            <div class="feature-switch-info">
+              <div class="feature-switch-name">{{ def.icon }} {{ def.name }}</div>
+              <div class="feature-switch-desc">{{ def.desc }}</div>
+            </div>
+            <button :class="['ios-switch', { on: featureStore.state.flags[def.key] }]" @click="featureStore.toggle(def.key)">
+              <span class="ios-switch-knob"></span>
+            </button>
+          </div>
+        </div>
+        <div class="feature-switch-hint">💡 部分功能默认关闭，按需开启；后续将作为高级功能提供</div>
+      </div>
+
+      <div class="profile-card" v-if="featureStore.state.flags.fitness">
         <div class="profile-card-title">冰箱营养概览</div>
         <div class="nutrition-grid">
           <div class="nutrition-item">
@@ -387,7 +424,7 @@
         <div class="macro-empty" v-else>暂无宏量营养素数据，添加常见食材后自动计算</div>
       </div>
 
-      <div class="profile-card">
+      <div class="profile-card" v-if="featureStore.state.flags.recipes">
         <div class="profile-card-title">今天吃什么</div>
         <div class="what-to-eat" @click="pickRandomRecipe">
           <div class="wte-icon">🎲</div>
@@ -712,8 +749,10 @@ import { useSwipeBatch } from './composables/useSwipeBatch.js'
 import { extractFood, extractRecipe } from './nlp/extractor.js'
 import AuthPage from './components/AuthPage.vue'
 import { authStore } from './store/authStore.js'
+import { useFeatureStore } from './store/featureStore.js'
 
 const foodStore = useFoodStore()
+const featureStore = useFeatureStore()
 
 const filterCategories = [
   { key:'all', label:'全部', emoji:'📋' }, { key:'蔬菜', label:'蔬菜', emoji:'🥬' },
@@ -1050,7 +1089,13 @@ function onLogout() {
 // ========== 菜谱 (P2-2) ==========
 const expandedRecipe = ref(null)
 const activeRecipeCategory = ref('all')
-const recommendedRecipes = computed(() => foodStore.getRecommendedRecipes())
+const recommendedRecipes = computed(() => {
+  // 食材搭配开关：关闭时浏览模式（全部菜谱平铺，不做库存匹配）
+  if (!featureStore.state.flags.pairing) {
+    return foodStore.recipes.map(r => ({ ...r, matched: [], unmatched: r.ingredients, ratio: 0, calories: 0, goalTags: [] }))
+  }
+  return foodStore.getRecommendedRecipes()
+})
 const filteredRecipes = computed(() => {
   if (activeRecipeCategory.value === 'all') return recommendedRecipes.value
   return recommendedRecipes.value.filter(r => r.category === activeRecipeCategory.value)

@@ -3036,3 +3036,114 @@ select.form-input {
   white-space: nowrap;
 }
 
+
+/* ==================== 功能开关（featureStore 隔离层） ==================== */
+.feature-locked {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 64px 32px;
+  text-align: center;
+}
+.feature-locked-icon {
+  font-size: 52px;
+  margin-bottom: 16px;
+}
+.feature-locked-title {
+  font-size: var(--font-title3, 20px);
+  font-weight: 700;
+  color: var(--text-primary, #1c1c1e);
+  margin-bottom: 8px;
+}
+.feature-locked-desc {
+  font-size: var(--font-footnote, 13px);
+  color: var(--text-secondary, #8e8e93);
+  margin-bottom: 24px;
+  line-height: 1.5;
+}
+.feature-locked-btn {
+  min-width: 140px;
+}
+
+.feature-mini-locked {
+  margin: 12px 0;
+  padding: 12px 14px;
+  background: rgba(255, 149, 0, 0.08);
+  border-radius: var(--radius-sm, 10px);
+  font-size: var(--font-footnote, 13px);
+  color: #b25000;
+  line-height: 1.5;
+}
+
+/* 功能设置卡片 */
+.feature-switch-list {
+  display: flex;
+  flex-direction: column;
+}
+.feature-switch-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 0;
+  border-bottom: 0.5px solid rgba(60, 60, 67, 0.15);
+}
+.feature-switch-item:last-child {
+  border-bottom: none;
+}
+.feature-switch-info {
+  flex: 1;
+  min-width: 0;
+}
+.feature-switch-name {
+  font-size: var(--font-callout, 16px);
+  font-weight: 600;
+  color: var(--text-primary, #1c1c1e);
+}
+.feature-switch-desc {
+  font-size: var(--font-footnote, 13px);
+  color: var(--text-secondary, #8e8e93);
+  margin-top: 3px;
+  line-height: 1.4;
+}
+.feature-switch-hint {
+  margin-top: 12px;
+  padding: 10px 12px;
+  background: rgba(0, 122, 255, 0.06);
+  border-radius: var(--radius-sm, 10px);
+  font-size: var(--font-caption, 12px);
+  color: var(--text-tertiary, #aeaeb2);
+  line-height: 1.5;
+}
+
+/* iOS 风格开关 */
+.ios-switch {
+  position: relative;
+  width: 51px;
+  height: 31px;
+  border: none;
+  border-radius: 16px;
+  background: #e9e9ea;
+  cursor: pointer;
+  transition: background 0.25s ease;
+  flex-shrink: 0;
+  padding: 0;
+}
+.ios-switch.on {
+  background: #34c759;
+}
+.ios-switch-knob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 27px;
+  height: 27px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+  transition: transform 0.25s ease;
+}
+.ios-switch.on .ios-switch-knob {
+  transform: translateX(20px);
+}
