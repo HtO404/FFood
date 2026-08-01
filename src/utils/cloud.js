@@ -140,7 +140,11 @@ async function callMock(fnName, data = {}) {
     case 'verifyToken': {
       const { token } = data
       if (!token || !token.startsWith('mock_token_')) return { code: 10005, message: 'token 无效', data: null }
-      const userId = token.split('_')[2]
+      // token 格式: mock_token_<user.id>_<timestamp>，user.id 自身可能含下划线（如 mock_wx_xxx）
+      // 取中间段: 去掉 'mock_token_' 前缀与末尾时间戳，剩余即完整 user.id
+      const parts = token.split('_')
+      if (parts.length < 4) return { code: 10005, message: 'token 无效', data: null }
+      const userId = parts.slice(2, -1).join('_')
       const user = users.find(u => u.id === userId)
       if (!user) return { code: 10005, message: '用户不存在', data: null }
       return { code: 0, message: 'ok', data: { user: { id: user.id, username: user.username, nickname: user.nickname, avatar: user.avatar } } }
