@@ -2373,15 +2373,16 @@ select.form-input {
 /* ===== 批量操作固定工具栏 ===== */
 .batch-toolbar-fixed {
   position: fixed;
+  left: var(--spacing-md);
+  right: var(--spacing-md);
   bottom: var(--batch-toolbar-bottom);
-  left: 50%;
-  transform: translateX(-50%);
-  width: 100%;
-  max-width: 480px;
   z-index: var(--z-batch-toolbar);
-  padding: 0 var(--spacing-md) 8px;
-  pointer-events: none;
-  box-sizing: border-box;
+  background: rgba(28, 28, 30, 0.92);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  box-shadow: var(--shadow-lg);
 }
 
 .batch-toolbar-inner {
@@ -2918,24 +2919,7 @@ select.form-input {
   color: var(--text-inverse);
 }
 
-/* FAB 在不同 Tab 的微调 */
-.fab.fab-recipe { background: var(--orange); }
-.fab.fab-shop { background: var(--blue); }
-
-/* 统一批量工具栏（覆盖不同 Tab） */
-.batch-toolbar-fixed {
-  position: fixed;
-  left: var(--spacing-md);
-  right: var(--spacing-md);
-  bottom: var(--batch-toolbar-bottom);
-  z-index: var(--z-batch-toolbar);
-  background: rgba(28, 28, 30, 0.92);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border-radius: var(--radius-md);
-  padding: 10px 14px;
-  box-shadow: var(--shadow-lg);
-}
+/* 统一批量工具栏：主定义在「批量操作固定工具栏」段落（避免重复覆盖） */
 
 /* 空状态 CTA 按钮 */
 .empty-cta {
