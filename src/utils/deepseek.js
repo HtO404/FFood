@@ -1,18 +1,16 @@
 /**
- * DeepSeek API 集成模块（前端直接调用版）
- * 
- * 用途：当后端不可用时，前端直接调用 DeepSeek API 获取食材保存天数推荐
- * 注意：生产环境应通过后端调用，避免暴露 API Key
- *       此模块仅在开发/演示阶段使用
- * 
- * DeepSeek API 端点：https://api.deepseek.com/v1/chat/completions
- * 模型：deepseek-chat
+ * DeepSeek API 集成模块
+ *
+ * 优先走后端代理（/api/smart/shelf-life），后端不可用时 fallback 到前端直调
+ * 生产环境应始终走后端代理，避免暴露 API Key
  */
+
+import { smartApi, IS_ONLINE } from './api.js'
 
 const DEEPSEEK_API_URL = 'https://api.deepseek.com/v1/chat/completions'
 const DEEPSEEK_MODEL = 'deepseek-chat'
 
-// API Key 从环境变量读取（.env.local 中配置 VITE_DEEPSEEK_API_KEY）
+// API Key 从环境变量读取（仅离线模式 fallback 用）
 const API_KEY = import.meta.env.VITE_DEEPSEEK_API_KEY || ''
 
 export const HAS_DEEPSEEK_KEY = !!API_KEY
@@ -26,10 +24,27 @@ export const HAS_DEEPSEEK_KEY = !!API_KEY
  * @returns {Promise<{days: number, reason: string, tips: string}>}
  */
 export async function recommendShelfLife(name, category, storage) {
-  if (!HAS_DEEPSEEK_KEY) {
-    // 无 API Key 时 fallback 到静态推荐
-    return staticRecommend(name, category, storage)
+  // 优先走后端代理（Key 不暴露在前端）
+  if (IS_ONLINE) {
+    try {
+      const res = await smartApi.shelfLife(name, category, storage)
+      if (res.code === 0 && res.data) {
+        const days = res.data.days
+        const source = res.data.source // 'static' | 'ai' | 'fallback'
+        return {
+          days,
+          reason: source === 'ai' ? '由 AI 根据食材特性智能推荐' : `基于${category}类${storage}保存数据`,
+          tips: getStorageTips(name, category, storage),
+          source,
+        }
+      }
+    } catch (e) {
+      console.warn('[DeepSeek] 后端代理调用失败，fallback 到本地推荐:', e)
+    }
   }
+
+  // 离线模式：有 API Key 时前端直调（仅开发/演示用）
+  if (HAS_DEEPSEEK_KEY) {
 
   const prompt = `你是一个食品安全与保鲜专家。请根据以下信息推荐保存天数：
 
@@ -64,7 +79,7 @@ export async function recommendShelfLife(name, category, storage) {
           { role: 'system', content: '你是食品安全专家，专注家庭食材保鲜。回答必须是指定格式的 JSON。' },
           { role: 'user', content: prompt },
         ],
-        temperature: 0.3,  // 低温度保证结果稳定
+        temperature: 0.3,
         max_tokens: 200,
         response_format: { type: 'json_object' },
       }),
@@ -99,6 +114,10 @@ export async function recommendShelfLife(name, category, storage) {
     console.warn('[DeepSeek] 调用异常，fallback 到静态推荐:', err)
     return staticRecommend(name, category, storage)
   }
+  }
+
+  // 无 API Key 且无后端：静态推荐
+  return staticRecommend(name, category, storage)
 }
 
 /**
