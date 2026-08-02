@@ -12,6 +12,12 @@ export default defineConfig({
   server: {
     port: 3000,
     open: true,
+    proxy: {
+      '/api': {
+        target: 'http://127.0.0.1:3001',
+        changeOrigin: true,
+      },
+    },
   },
   build: {
     // 手动分包：segmentit 是超大依赖（3.6MB），单独拆出避免阻塞首屏

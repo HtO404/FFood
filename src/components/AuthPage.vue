@@ -65,8 +65,8 @@
             <div v-if="errors.confirmPassword" class="auth-error">{{ errors.confirmPassword }}</div>
           </div>
 
-          <!-- 图形验证码 -->
-          <div class="auth-field">
+          <!-- 图形验证码（仅离线/mock 模式显示，真后端有 bcrypt+防暴力锁定） -->
+          <div class="auth-field" v-if="!authStore.IS_ONLINE">
             <label class="auth-label">图形验证码</label>
             <div class="captcha-row">
               <input
@@ -109,8 +109,11 @@
         </button>
       </div>
 
-      <!-- Mock 模式提示 -->
-      <div class="auth-mock-hint" v-if="authStore.IS_MOCK">
+      <!-- 模式提示 -->
+      <div class="auth-mock-hint" v-if="authStore.IS_ONLINE">
+        ✅ 已连接后端：数据保存在 MySQL 数据库，支持多设备同步。
+      </div>
+      <div class="auth-mock-hint" v-else-if="authStore.IS_MOCK">
         🧪 演示模式：登录数据仅存本地浏览器，未接真后端。配好云开发后切真鉴权。
       </div>
 
@@ -141,7 +144,8 @@ const errors = reactive({ username: '', password: '', confirmPassword: '' })
 const canSubmit = computed(() => {
   if (!username.value || !password.value) return false
   if (mode.value === 'register' && !confirmPassword.value) return false
-  if (!captchaCode.value || captchaCode.value.length !== 4) return false
+  // 离线模式需要验证码，在线模式跳过
+  if (!authStore.IS_ONLINE && (!captchaCode.value || captchaCode.value.length !== 4)) return false
   return !errors.username && !errors.password && !errors.confirmPassword
 })
 
@@ -196,9 +200,12 @@ async function onSubmit() {
   validatePassword()
   validateConfirmPassword()
   if (errors.username || errors.password || errors.confirmPassword) return
-  if (!captchaCode.value || captchaCode.value.length !== 4) {
-    captchaError.value = '请输入 4 位验证码'
-    return
+  // 离线模式校验验证码，在线模式跳过
+  if (!authStore.IS_ONLINE) {
+    if (!captchaCode.value || captchaCode.value.length !== 4) {
+      captchaError.value = '请输入 4 位验证码'
+      return
+    }
   }
 
   const res = mode.value === 'login'

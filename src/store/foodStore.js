@@ -465,7 +465,10 @@ class FoodStore {
           this.state.foods = list.map(f => ({
             ...f,
             id: String(f.id),
-            daysLeft: calcDaysLeft(f.expiryDate),
+            // 后端返回 snake_case，统一映射为 camelCase
+            purchaseDate: f.purchaseDate || f.purchase_date,
+            expiryDate: f.expiryDate || f.expiry_date,
+            daysLeft: calcDaysLeft(f.expiryDate || f.expiry_date),
           }))
           this.save() // 同步到 localStorage 作为缓存
           return
