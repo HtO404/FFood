@@ -2784,14 +2784,14 @@ select.form-input {
   .nav-bar { padding-top: var(--spacing-xl); }
 }
 
-/* ---- 大屏 (≥769px)：桌面/平板，限制最大宽度并增加留白 ---- */
+/* ---- 中大屏 (≥769px)：平板/小桌面，放宽到 720px 单栏 ---- */
 @media (min-width: 769px) {
   :root {
     --tabbar-height: 64px;
   }
-  .app { max-width: 520px; }
-  .modal-sheet { width: 520px; }
-  .tab-bar { width: 520px; }
+  .app { max-width: 720px; }
+  .modal-sheet { width: 640px; }
+  .tab-bar { width: 720px; }
   .tab-icon { font-size: 24px; }
   .tab-label { font-size: 11px; }
   .nav-title { font-size: 32px; }
@@ -2800,6 +2800,31 @@ select.form-input {
   .select-checkbox { width: 28px; height: 28px; border-radius: 14px; font-size: 16px; }
   .checkbox-icon { width: 28px; height: 28px; border-radius: 14px; font-size: 16px; }
   .shop-check { width: 26px; height: 26px; border-radius: 13px; font-size: 14px; }
+  /* 卡片在宽屏下稍增内边距，提升可读性 */
+  .food-card { padding: 16px 20px; }
+  .recipe-item-card { padding: 16px 20px; }
+  .category-scroll { gap: 8px; }
+}
+
+/* ---- 宽屏 (≥1024px)：桌面端，放宽到 880px + 双栏侧边内容 ---- */
+@media (min-width: 1024px) {
+  .app { max-width: 880px; }
+  .modal-sheet { width: 760px; max-width: 90vw; }
+  .tab-bar { width: 880px; }
+  .nav-title { font-size: 36px; }
+  /* 宽屏下导航栏和 TabBar 居中显示 */
+  .nav-bar { padding-top: var(--spacing-xl); }
+  /* 统计面板/弹窗在宽屏下更宽 */
+  .stats-panel { width: 760px; max-width: 90vw; }
+  /* 卡片间距适当增大 */
+  .food-list-section { gap: 10px; }
+  .food-card { padding: 18px 24px; }
+  /* 分类筛选在宽屏下展开更多 */
+  .category-scroll { gap: 10px; padding: 4px 0; }
+  /* 购物清单输入行宽屏下更宽 */
+  .shop-input-row { gap: 12px; }
+  /* 推荐品类卡片宽屏下两列排列 */
+  .category-track-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
 }
 
 /* ---- 横屏 (短边≤500px 且宽高比>1)：压缩 TabBar 和 FAB ---- */
