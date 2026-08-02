@@ -16,6 +16,9 @@
       <router-view />
     </main>
 
+    <!-- 首次使用引导 -->
+    <Onboarding v-if="showTabBar" />
+
     <!-- TabBar：仅主应用页面显示，登录页不显示 -->
     <nav class="tab-bar" v-if="showTabBar">
       <button :class="['tab-item', { active: route.name === 'food' }]" @click="switchTab('food')">
@@ -44,6 +47,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useFoodStore } from './store/foodStore.js'
 import { authStore } from './store/authStore.js'
 import { guestModeRef } from './router/index.js'
+import Onboarding from './components/Onboarding.vue'
 
 const route = useRoute()
 const router = useRouter()
